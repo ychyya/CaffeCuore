@@ -5,20 +5,27 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Caffè Cuore — Menu</title>
 <style>
-:root{
-  --bg:#0f0f12; --card:#17171c; --muted:#9aa0a6; --text:#e9eaee; --accent:#e4572e;
-  --pill:#24242a; --pill-active:#2d2d35; --border:#2a2a32;
-}
 *{box-sizing:border-box}
+/* ensure ::before/::after on body are painted across the viewport */
+html, body { min-height:100%; }
+body { min-height:100vh; position:relative; }
+
 body{margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif; background:var(--bg); color:var(--text)}
 header{
-  position:sticky; top:0; z-index:10; backdrop-filter:saturate(1.2) blur(8px);
-  background:linear-gradient(180deg, rgba(15,15,18,.92), rgba(15,15,18,.75));
+  position:sticky; top:0; z-index:10;
+  backdrop-filter:saturate(1.2) blur(8px);
+  background:linear-gradient(180deg, rgba(30,30,32,.55), rgba(30,30,32,.35));
   border-bottom:1px solid var(--border);
 }
 .wrap{max-width:1100px; margin:0 auto; padding:16px}
 .top{display:flex; gap:16px; align-items:center; justify-content:space-between; flex-wrap:wrap}
-h1{font-size:20px; margin:0; letter-spacing:.3px}
+/* Logo placement */
+.logo { display:flex; align-items:center }
+.logo img{ height:48px; width:auto; display:block }
+
+/* If your header lays out with flex, keep it from shrinking away */
+.top .logo { flex:0 0 auto }
+
 .lang{display:flex; gap:8px; background:var(--pill); padding:4px; border-radius:999px; border:1px solid var(--border)}
 .lang button{border:0; background:transparent; color:var(--muted); padding:8px 14px; border-radius:999px; cursor:pointer; font-weight:600}
 .lang button.active{background:var(--pill-active); color:var(--text)}
@@ -59,18 +66,163 @@ h1{font-size:20px; margin:0; letter-spacing:.3px}
 /* Spirits layout overrides on desktop */
 .spirits .card{grid-template-columns:1.6fr 1fr 0.6fr 0.6fr 0.6fr 0.8fr 1.4fr}
 .spirits .head{grid-template-columns:1.6fr 1fr 0.6fr 0.6fr 0.6fr 0.8fr 1.4fr}
+
+/* ================= THEME BY CATEGORY ================= */
+body.theme-red{
+  --bg:#2b0f14;        /* bordo pozadina */
+  --card:#3a121a;
+  --muted:#c2a6a6;
+  --text:#f5eaea;
+  --accent:#e4572e;
+  --pill:#422027;
+  --pill-active:#5c2b34;
+  --border:#5a2a2a;
+}
+
+body.theme-white{
+  /* toplo „bijelo vino“ (slamno-zlatno) */
+  --bg:#221e16;
+  --card:#2c261b;
+  --muted:#d8cdaa;
+  --text:#fff8df;
+  --accent:#e2c044;    /* zlatni akcenat */
+  --pill:#3a3225;
+  --pill-active:#4a3d2b;
+  --border:#4d3e2a;
+}
+
+body.theme-rose{
+  --bg:#2b1720;        /* rosé */
+  --card:#3a1d29;
+  --muted:#e0b7c1;
+  --text:#ffeef2;
+  --accent:#ff7ea3;
+  --pill:#4a2330;
+  --pill-active:#5a2b3a;
+  --border:#5b2a3a;
+}
+
+body.theme-prosecco{
+  /* varijable za elemente; pravi gradijent/mjehuriće dodajemo ispod preko ::before/::after */
+  --bg:transparent;    /* pozadina ide iz ::before */
+  --card:#2f2a22;
+  --muted:#e8d9c9;
+  --text:#fff9f0;
+  --accent:#f1c76a;
+  --pill:#4d4335;
+  --pill-active:#5e4f3d;
+  --border:#6a5842;
+}
+/* Gradijent (bijelo -> rosé) + mjehurići */
+body.theme-prosecco::before{
+  content:"";
+  position:fixed; inset:0; z-index:-2;
+  background:
+    radial-gradient(1200px 700px at 15% 120%, rgba(226,192,68,.18), transparent 60%),
+    radial-gradient(900px 600px at 85% -10%, rgba(255,126,163,.14), transparent 55%),
+    linear-gradient(180deg, #221e16 0%, #2b1720 100%); /* white->rose */
+}
+/* PROSECCO bubbles – top, middle, bottom balanced */
+body.theme-prosecco::after{
+  content:"";
+  position:fixed; inset:0; z-index:-1; pointer-events:none;
+  background:
+    /* ===== TOP ===== */
+    radial-gradient(closest-side, transparent 78%, rgba(255,255,255,.16) 79%, rgba(255,255,255,.07) 86%, transparent 87%) 10% 18% / 150px 150px no-repeat,
+    radial-gradient(closest-side, transparent 76%, rgba(255,255,255,.16) 77%, rgba(255,255,255,.07) 84%, transparent 85%) 30% 12% / 110px 110px no-repeat,
+    radial-gradient(closest-side, transparent 76%, rgba(255,255,255,.16) 77%, rgba(255,255,255,.07) 84%, transparent 85%) 52% 16% / 120px 120px no-repeat,
+    radial-gradient(closest-side, transparent 76%, rgba(255,255,255,.16) 77%, rgba(255,255,255,.07) 84%, transparent 85%) 72% 10% / 100px 100px no-repeat,
+    radial-gradient(closest-side, transparent 78%, rgba(255,255,255,.16) 79%, rgba(255,255,255,.07) 86%, transparent 87%) 88% 20% / 140px 140px no-repeat,
+
+    /* ===== MIDDLE ===== */
+    radial-gradient(closest-side, transparent 74%, rgba(255,255,255,.16) 75%, rgba(255,255,255,.07) 82%, transparent 83%) 20% 55% / 60px 60px no-repeat,
+    radial-gradient(closest-side, transparent 74%, rgba(255,255,255,.16) 75%, rgba(255,255,255,.07) 82%, transparent 83%) 48% 60% / 75px 75px no-repeat,
+    radial-gradient(closest-side, transparent 74%, rgba(255,255,255,.16) 75%, rgba(255,255,255,.07) 82%, transparent 83%) 75% 50% / 55px 55px no-repeat,
+
+    /* ===== BOTTOM ===== */
+    radial-gradient(closest-side, transparent 78%, rgba(255,255,255,.16) 79%, rgba(255,255,255,.07) 86%, transparent 87%) 12% 96% / 130px 130px no-repeat,
+    radial-gradient(closest-side, transparent 78%, rgba(255,255,255,.16) 79%, rgba(255,255,255,.07) 86%, transparent 87%) 88% 102% / 150px 150px no-repeat,
+    radial-gradient(closest-side, transparent 75%, rgba(255,255,255,.18) 76%, rgba(255,255,255,.08) 84%, transparent 85%) 30% 98% / 90px 90px no-repeat,
+    radial-gradient(closest-side, transparent 75%, rgba(255,255,255,.18) 76%, rgba(255,255,255,.08) 84%, transparent 85%) 68% 94% / 80px 80px no-repeat,
+
+    /* smaller accents */
+    radial-gradient(closest-side, transparent 72%, rgba(255,255,255,.18) 73%, rgba(255,255,255,.08) 82%, transparent 83%) 8% 88% / 26px 26px no-repeat,
+    radial-gradient(closest-side, transparent 70%, rgba(255,255,255,.18) 71%, rgba(255,255,255,.08) 80%, transparent 81%) 24% 95% / 22px 22px no-repeat,
+    radial-gradient(closest-side, transparent 70%, rgba(255,255,255,.18) 71%, rgba(255,255,255,.08) 80%, transparent 81%) 41% 92% / 18px 18px no-repeat,
+
+    /* highlights (tiny glare dots) */
+    radial-gradient(circle at 14% 22%, rgba(255,255,255,.25) 0 2px, transparent 3px),
+    radial-gradient(circle at 33% 14%, rgba(255,255,255,.22) 0 1.6px, transparent 2.6px),
+    radial-gradient(circle at 55% 19%, rgba(255,255,255,.20) 0 1.4px, transparent 2.4px),
+    radial-gradient(circle at 74% 12%, rgba(255,255,255,.24) 0 1.8px, transparent 2.8px),
+    radial-gradient(circle at 89% 21%, rgba(255,255,255,.26) 0 2px,  transparent 3px);
+  animation: bubbles 12s linear infinite;
+  opacity:.95;
+  filter: blur(.15px);
+}
+
+@keyframes bubbles{
+  0%   { transform: translateY(0) }
+  100% { transform: translateY(-110px) }
+}
+/* PRISMATIC metallic look for Spirituosen */
+/* Prism base for Spirituosen */
+body.theme-spirits::before{
+  content:"";
+  position:fixed; inset:0; z-index:-2; pointer-events:none;
+  background:
+    /* base dark green (darker now) */
+    linear-gradient(180deg, #0c1b13 0%, #112820 100%),
+
+    /* prism shards */
+    conic-gradient(from 210deg at 50% 50%,
+      rgba(255,255,255,.05) 0 10%,
+      rgba(255,255,255,0)   10% 25%,
+      rgba(255,255,255,.04) 25% 35%,
+      rgba(255,255,255,0)   35% 55%,
+      rgba(255,255,255,.06) 55% 70%,
+      rgba(255,255,255,0)   70% 100%),
+
+    linear-gradient(135deg, rgba(255,255,255,.04) 0%, transparent 50%),
+    linear-gradient(225deg, rgba(255,255,255,.03) 0%, transparent 50%);
+  background-blend-mode: overlay, screen, normal;
+  opacity:.95;
+}
+/* Force visible borders in Spirituosen mode */
+body.theme-spirits {
+  --border: #ffffff66;   /* semi-transparent white */
+  --pill: #295a47;       /* button background darker green */
+  --pill-active: #ffffff; /* active button = white background */
+}
+
+/* language + category pills */
+body.theme-spirits .lang button,
+body.theme-spirits #cats button {
+  border:1px solid var(--border) !important;
+  color:#ffffff;
+}
+
+/* active pill style */
+body.theme-spirits .lang button.active,
+body.theme-spirits #cats button.active {
+  background:#ffffff !important;
+  color:#0f2018 !important;  /* readable dark green text on white */
+}
+
+
 </style>
 </head>
 <body>
 <header>
   <div class="wrap">
     <div class="top">
-      <h1>🍷 Caffè Cuore — Menu</h1>
-      <div class="lang" id="langBar">
-        <button data-lang="en" class="active">English</button>
-        <button data-lang="de">Deutsch</button>
-        <button data-lang="bs">Bosanski</button>
-      </div>
+        <a href="index.html" class="logo" aria-label="Caffè Cuore">
+            <img src="Pictures/Logo.jpg" alt="Caffè Cuore logo" />
+          </a>
+          <div class="lang" id="langBar">
+
+          </div>
+          
       <div class="tools">
         <div class="search">
           <span class="icon">🔎</span>
@@ -97,39 +249,59 @@ h1{font-size:20px; margin:0; letter-spacing:.3px}
   <p class="pillnote" id="tipLine">Tip: Start typing “Riesling”, “Veneto”, “citrus”, “sushi”, “rum”…</p>
 </main>
 
-<script>
-/* ================== I18N ================== */
-const LABELS = {
-  en: {
-    searchPH:"Search wines, producer, country, taste...",
-    // wine headers
-    name:"Name", producer:"Producer", country:"Country", vintage:"Vintage", taste:"Taste", food:"Food Pairing", special:"Special",
-    // spirits headers
-    s_name:"Name", s_style:"Type/Style", s_abv:"ABV", s_vol:"Volume", s_price:"Price", s_origin:"Origin", s_notes:"Notes",
-    // categories
-    white:"White", red:"Red", rose:"Rosé", prosecco:"Prosecco", spirits:"Spirits",
-    // counts
-    shown_wines:"wines shown", shown_spirits:"spirits shown"
-  },
-  de: {
-    searchPH:"Suche nach Wein, Produzent, Land, Geschmack...",
-    name:"Weinname", producer:"Produzent", country:"Land", vintage:"Jahrgang", taste:"Geschmack", food:"Speisenempfehlung", special:"Besonderes",
-    s_name:"Name", s_style:"Art/Stil", s_abv:"Alk.%", s_vol:"Inhalt", s_price:"Preis", s_origin:"Herkunft", s_notes:"Hinweise",
-    white:"Weiß", red:"Rot", rose:"Rosé", prosecco:"Prosecco", spirits:"Spirituosen",
-    shown_wines:"Weine angezeigt", shown_spirits:"Spirituosen angezeigt"
-  },
-  bs: {
-    searchPH:"Pretraga: vino, proizvođač, zemlja, okus...",
-    name:"Ime vina", producer:"Proizvođač", country:"Zemlja", vintage:"Godina", taste:"Okus", food:"Uz hranu", special:"Posebno",
-    s_name:"Naziv", s_style:"Tip/Stil", s_abv:"Alk.%", s_vol:"Količina", s_price:"Cijena", s_origin:"Porijeklo", s_notes:"Napomene",
-    white:"Bijelo", red:"Crveno", rose:"Rosé", prosecco:"Prosecco", spirits:"Žestoka pića",
-    shown_wines:"vina prikazano", shown_spirits:"pića prikazano"
-  }
-};
+<footer class="wrap">
+    © ycHyYa • Caffè Cuore • 
+  </footer>
 
-let currentLang = 'en';
-let currentCat = 'white';
-let query = '';
+  <script>
+    /* ================== I18N ================== */
+    const LABELS = {
+      en: {
+        searchPH:"Search wines, producer, country, taste...",
+        // wine headers
+        name:"Name", producer:"Producer", country:"Country", vintage:"Vintage", taste:"Taste", food:"Food Pairing", special:"Special",
+        // spirits headers
+        s_name:"Name", s_style:"Type/Style", s_abv:"ABV", s_vol:"Volume", s_price:"Price", s_origin:"Origin", s_notes:"Notes",
+        // categories
+        white:"White", red:"Red", rose:"Rosé", prosecco:"Prosecco", spirits:"Spirits",
+        // counts
+        shown_wines:"wines shown", shown_spirits:"spirits shown"
+      },
+      de: {
+        searchPH:"Suche nach Wein, Produzent, Land, Geschmack...",
+        name:"Weinname", producer:"Produzent", country:"Land", vintage:"Jahrgang", taste:"Geschmack", food:"Speisenempfehlung", special:"Besonderes",
+        s_name:"Name", s_style:"Art/Stil", s_abv:"Alk.%", s_vol:"Inhalt", s_price:"Preis", s_origin:"Herkunft", s_notes:"Hinweise",
+        white:"Weiß", red:"Rot", rose:"Rosé", prosecco:"Prosecco", spirits:"Spirituosen",
+        shown_wines:"Weine angezeigt", shown_spirits:"Spirituosen angezeigt"
+      },
+      bs: {
+        searchPH:"Pretraga: vino, proizvođač, zemlja, okus...",
+        name:"Ime vina", producer:"Proizvođač", country:"Zemlja", vintage:"Godina", taste:"Okus", food:"Uz hranu", special:"Posebno",
+        s_name:"Naziv", s_style:"Tip/Stil", s_abv:"Alk.%", s_vol:"Količina", s_price:"Cijena", s_origin:"Porijeklo", s_notes:"Napomene",
+        white:"Bijelo", red:"Crveno", rose:"Rosé", prosecco:"Prosecco", spirits:"Žestoka pića",
+        shown_wines:"vina prikazano", shown_spirits:"pića prikazano"
+      },
+      it: {
+        searchPH:"Cerca vini, produttore, paese, gusto...",
+        name:"Nome", producer:"Produttore", country:"Paese", vintage:"Annata", taste:"Gusto", food:"Abbinamento", special:"Speciale",
+        s_name:"Nome", s_style:"Tipo/Stile", s_abv:"Alcol", s_vol:"Volume", s_price:"Prezzo", s_origin:"Origine", s_notes:"Note",
+        white:"Bianco", red:"Rosso", rose:"Rosato", prosecco:"Prosecco", spirits:"Distillati",
+        shown_wines:"vini mostrati", shown_spirits:"distillati mostrati" },
+     es: {
+        searchPH:"Buscar vinos, productor, país, sabor...",
+        name:"Nombre", producer:"Productor", country:"País", vintage:"Añada", taste:"Sabor", food:"Maridaje", special:"Especial",
+        s_name:"Nombre", s_style:"Tipo/Estilo", s_abv:"Alcohol", s_vol:"Volumen", s_price:"Precio", s_origin:"Origen", s_notes:"Notas",
+        white:"Blanco", red:"Tinto", rose:"Rosado", prosecco:"Prosecco", spirits:"Destilados",
+        shown_wines:"vinos mostrados", shown_spirits:"destilados mostrados"
+    }
+
+    };
+    
+    let currentLang = 'de';     // DEFAULT: German
+    let currentCat  = 'white';  // kategorije su ENG ključevi: white, red, rose, prosecco, spirits
+    let query = '';
+    
+
 
 /* ================== DATA (ALL CATEGORIES) ==================
    — White / Red / Rosé pulled from your PDFs (EN/DE/BS).
@@ -507,17 +679,13 @@ const ITEMS = [
         taste:"Würzig, elegant",food:"Wild, Grillfleisch",special:"Seltene autochthone Sorte"},
     bs:{name:"Schioppettino",producer:"Monte del Carpini",country:"Italija (Friuli)",vintage:"2018",
         taste:"Začinsko, elegantno",food:"Divljač, meso s roštilja",special:"Rijetka autohtona sorta Friuli"} },
-  {id:"red_i_balzini_balze_verdi_2020",category:"red",
-    en:{name:"I Balzini Balze Verdi",producer:"Di Santo & Di Santo",country:"Italy (Tuscany)",vintage:"2020",
-        taste:"Fresh, fruity, floral",food:"Pasta, roasts",special:"Boutique winery"},
-    de:{name:"I Balzini Balze Verdi",producer:"Di Santo & Di Santo",country:"Italien (Toskana)",vintage:"2020",
-        taste:"Frisch, fruchtig, blumig",food:"Pasta, Braten",special:"Boutique-Weingut"},
-    bs:{name:"I Balzini Balze Verdi",producer:"Di Santo & Di Santo",country:"Italija (Toskana)",vintage:"2020",
-    taste:"Fresh, fruity, floral",food:"Pasta, roasts",special:"Boutique winery"},
-    de:{name:"I Balzini Balze Verdi",producer:"Di Santo & Di Santo",country:"Italien (Toskana)",vintage:"2020",
-        taste:"Frisch, fruchtig, blumig",food:"Pasta, Braten",special:"Boutique-Weingut"},
-    bs:{name:"I Balzini Balze Verdi",producer:"Di Santo & Di Santo",country:"Italija (Toskana)",vintage:"2020",
-        taste:"Svježe, voćno, cvjetno",food:"Pasta, pečeno meso",special:"Boutique vinarija"} },
+        { id:"red_i_balzini_balze_verdi_2020", category:"red",
+  en:{ name:"I Balzini Balze Verdi", producer:"Di Santo & Di Santo", country:"Italy (Tuscany)", vintage:"2020",
+       taste:"Fresh, fruity, floral", food:"Pasta, roasts", special:"Boutique winery" },
+  de:{ name:"I Balzini Balze Verdi", producer:"Di Santo & Di Santo", country:"Italien (Toskana)", vintage:"2020",
+       taste:"Frisch, fruchtig, blumig", food:"Pasta, Braten", special:"Boutique-Weingut" },
+  bs:{ name:"I Balzini Balze Verdi", producer:"Di Santo & Di Santo", country:"Italija (Toskana)", vintage:"2020",
+       taste:"Svježe, voćno, cvjetno", food:"Paste, pečenja", special:"Boutique vinarija" }},
   {id:"red_ronco_dei_domenicani_1999",category:"red",
     en:{name:"Ronco dei Domenicani (Colli Orientali del Friuli)",producer:"—",country:"Italy (Friuli)",vintage:"1999",
         taste:"Complex, mature, dried fruits",food:"Aged cheese, oven-baked dishes",special:"Very old vintage, rarity"},
@@ -619,20 +787,60 @@ const ITEMS = [
   // Ovdje dodaj listu kad pošalješ PDF za žestoka pića.
 ];
 
+
 /* ===== helper: columns per category ===== */
-const WINE_COLS = ["name","producer","country","vintage","taste","food","special"];
+const WINE_COLS   = ["name","producer","country","vintage","taste","food","special"];
 const SPIRIT_COLS = ["s_name","s_style","s_origin","s_abv","s_vol","s_price","s_notes"];
 
 /* ===== DOM refs ===== */
-const grid = document.getElementById('grid');
-const headRow = document.getElementById('headRow');
-const countEl = document.getElementById('count');
-const tipLine = document.getElementById('tipLine');
+const grid      = document.getElementById('grid');
+const headRow   = document.getElementById('headRow');
+const countEl   = document.getElementById('count');
+const tipLine   = document.getElementById('tipLine');
 const searchInput = document.getElementById('searchInput');
-const catBar = document.getElementById('cats');
-const langBar = document.getElementById('langBar');
+const catBar    = document.getElementById('cats');
+const langBar   = document.getElementById('langBar');
 
-/* ===== UI: build headers ===== */
+/* ===== theme per category ===== */
+function applyTheme(){
+  const themeMap = { white:'theme-white', red:'theme-red', rose:'theme-rose', prosecco:'theme-prosecco', spirits:'theme-spirits' };
+  document.body.classList.remove('theme-white','theme-red','theme-rose','theme-prosecco','theme-spirits');
+  document.body.classList.add(themeMap[currentCat] || 'theme-white');
+}
+
+/* ===== Language bar (order & labels depend on currentLang) ===== */
+const LANG_ORDER = {
+  de:['de','en','bs','it','es'],
+  en:['de','en','bs','it','es'],
+  bs:['de','en','bs','it','es'],
+  it:['de','en','bs','it','es'],
+  es:['de','en','bs','it','es']
+};
+
+function langLabelFor(code, ctx){
+  const map = {
+    de:{ de:"Deutsch", en:"Englisch", bs:"Bosnisch", it:"Italienisch", es:"Spanisch" },
+    en:{ de:"German",  en:"English",  bs:"Bosnian",   it:"Italian",    es:"Spanish"  },
+    bs:{ de:"Njemački",en:"Engleski", bs:"Bosanski", it:"Talijanski", es:"Španski" },
+    it:{ de:"Tedesco", en:"Inglese",  bs:"Bosniaco",  it:"Italiano",   es:"Spagnolo" },
+    es:{ de:"Alemán",  en:"Inglés",   bs:"Bosnio",    it:"Italiano",   es:"Español"  }
+  };
+  return map[ctx][code];
+}
+
+function renderLangBar(){
+  langBar.innerHTML = '';
+  const order = LANG_ORDER[currentLang] || ['de','en','bs'];
+  order.forEach(code=>{
+    const btn = document.createElement('button');
+    btn.dataset.lang = code;
+    btn.textContent = langLabelFor(code, currentLang);
+    if(code === currentLang) btn.classList.add('active');
+    langBar.appendChild(btn);
+  });
+}
+
+/* ===== Table head ===== */
 function renderHead(){
   headRow.classList.toggle('spirits', currentCat==='spirits');
   headRow.innerHTML = '';
@@ -648,16 +856,16 @@ function renderHead(){
 /* ===== filter + render cards ===== */
 function matchesQuery(item){
   if(!query) return true;
-  const langObj = item[currentLang];
-  const hay = [
-    langObj.name, langObj.producer, langObj.country, langObj.taste, langObj.food, langObj.special
-  ].join(' ').toLowerCase();
+  const l = item[currentLang];
+  const hay = [l.name,l.producer,l.country,l.taste,l.food,l.special].join(' ').toLowerCase();
   return hay.includes(query.toLowerCase());
 }
 
 function renderGrid(){
+  applyTheme();
   renderHead();
   grid.classList.toggle('spirits', currentCat==='spirits');
+
   const labels = LABELS[currentLang];
   const data = ITEMS.filter(x=>x.category===currentCat && matchesQuery(x));
 
@@ -667,82 +875,65 @@ function renderGrid(){
     const card = document.createElement('div');
     card.className = 'card';
 
-    if(currentCat==='spirits'){
-      // label map for spirits
-      const fields = [
-        [labels.s_name, l.name],
-        [labels.s_style, l.style||l.taste||''],
-        [labels.s_origin, l.country||''],
-        [labels.s_abv, l.abv||''],
-        [labels.s_vol, l.volume||''],
-        [labels.s_price, l.price||''],
-        [labels.s_notes, l.special||l.notes||'']
-      ];
-      fields.forEach(([lab,val])=>{
-        const d = document.createElement('div');
-        if(val===undefined) val='';
-        d.innerHTML = `<div class="label">${lab}</div>${val}`;
-        card.appendChild(d);
-      });
-    }else{
-      // wines layout
-      const fields = [
-        [labels.name, l.name],
-        [labels.producer, l.producer],
-        [labels.country, l.country],
-        [labels.vintage, l.vintage],
-        [labels.taste, l.taste],
-        [labels.food, l.food],
-        [labels.special, l.special]
-      ];
-      fields.forEach(([lab,val])=>{
-        const d = document.createElement('div');
-        d.innerHTML = `<div class="label">${lab}</div>${val}`;
-        card.appendChild(d);
-      });
-    }
+    const fields = (currentCat==='spirits')
+      ? [
+          [labels.s_name, l.name],
+          [labels.s_style, l.style || l.taste || ''],
+          [labels.s_origin, l.country || ''],
+          [labels.s_abv, l.abv || ''],
+          [labels.s_vol, l.volume || ''],
+          [labels.s_price, l.price || ''],
+          [labels.s_notes, l.special || l.notes || '']
+        ]
+      : [
+          [labels.name, l.name],
+          [labels.producer, l.producer],
+          [labels.country, l.country],
+          [labels.vintage, l.vintage],
+          [labels.taste, l.taste],
+          [labels.food, l.food],
+          [labels.special, l.special]
+        ];
 
-    // === make card clickable → detail page (based on wine name) ===
-    const fileSafe = String(l.name || '')
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g,'-')
-      .replace(/(^-|-$)/g,'');
+    fields.forEach(([lab,val])=>{
+      const d = document.createElement('div');
+      d.innerHTML = `<div class="label">${lab}</div>${val ?? ''}`;
+      card.appendChild(d);
+    });
+
+    // click -> detail page (slug from name)
+    const fileSafe = String(l.name||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
     const detailFile = `wine-${fileSafe}.html`;
     card.style.cursor = 'pointer';
-    card.addEventListener('click', () => {
-      window.location.href = detailFile;
-    });
+    card.addEventListener('click', ()=>{ window.location.href = detailFile; });
 
     grid.appendChild(card);
   });
 
-  const isSpirits = currentCat==='spirits';
-  const countLabel = isSpirits ? labels.shown_spirits : labels.shown_wines;
+  const countLabel = (currentCat==='spirits') ? labels.shown_spirits : labels.shown_wines;
   countEl.textContent = `${data.length} ${countLabel}`;
 }
 
-
 /* ===== wire up language, category, search ===== */
 langBar.addEventListener('click', (e)=>{
-  const btn = e.target.closest('button[data-lang]');
-  if(!btn) return;
-  [...langBar.children].forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
+  const btn = e.target.closest('button[data-lang]'); if(!btn) return;
   currentLang = btn.dataset.lang;
-  // placeholders & category button labels
+  renderLangBar();
+  // localize UI
   searchInput.placeholder = LABELS[currentLang].searchPH;
   [...catBar.querySelectorAll('button[data-cat]')].forEach(b=>{
     b.textContent = LABELS[currentLang][b.dataset.cat];
+    b.classList.toggle('active', b.dataset.cat === currentCat);
   });
   renderGrid();
 });
 
 catBar.addEventListener('click', (e)=>{
-  const btn = e.target.closest('button[data-cat]');
-  if(!btn) return;
+  const btn = e.target.closest('button[data-cat]'); if(!btn) return;
   [...catBar.children].forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   currentCat = btn.dataset.cat;
+  applyTheme();
   renderGrid();
 });
 
@@ -751,9 +942,31 @@ searchInput.addEventListener('input', (e)=>{
   renderGrid();
 });
 
-/* ===== initial boot ===== */
-searchInput.placeholder = LABELS[currentLang].searchPH;
-renderGrid();
+/* ===== initial boot (show wines immediately) ===== */
+(function(){
+  const p = new URLSearchParams(location.search);
+  const lang = p.get('lang');
+  const cat  = p.get('cat');
+  const q    = p.get('q');
+
+  currentLang = (lang && LABELS[lang]) ? lang : 'de';
+  currentCat  = cat || 'white';
+  if(typeof q === 'string'){ query=q; searchInput.value=q; } else { query=''; searchInput.value=''; }
+
+  renderLangBar();
+  // localize categories & placeholders
+  [...catBar.querySelectorAll('button[data-cat]')].forEach(b=>{
+    b.textContent = LABELS[currentLang][b.dataset.cat];
+    b.classList.toggle('active', b.dataset.cat === currentCat);
+  });
+  searchInput.placeholder = LABELS[currentLang].searchPH;
+
+  applyTheme();
+  renderHead();
+  renderGrid(); // <- prikaži odmah
+})();
+
 </script>
+
 </body>
 </html>
