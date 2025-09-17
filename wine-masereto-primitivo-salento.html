@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Masereto Primitivo Salento — Caffè Cuore</title>
+<meta name="description" content="Masereto Primitivo Salento — details, tasting notes, food pairing.">
+<style>
+:root{
+  --bg:#0f0f12; --card:#17171c; --muted:#9aa0a6; --text:#e9eaee;
+  --accent:#e4572e; --pill:#24242a; --pill-active:#2d2d35; --border:#2a2a32;
+}
+*{box-sizing:border-box}
+body{margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif; background:var(--bg); color:var(--text)}
+a{color:inherit; text-decoration:none}
+header{
+  position:sticky; top:0; z-index:10; backdrop-filter:saturate(1.2) blur(8px);
+  background:linear-gradient(180deg, rgba(15,15,18,.92), rgba(15,15,18,.75));
+  border-bottom:1px solid var(--border);
+}
+.wrap{max-width:980px; margin:0 auto; padding:16px}
+.top{display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap}
+h1{font-size:18px; margin:0; letter-spacing:.3px}
+.lang{display:flex; gap:8px; background:var(--pill); padding:4px; border-radius:999px; border:1px solid var(--border)}
+.lang button{border:0; background:transparent; color:var(--muted); padding:8px 14px; border-radius:999px; cursor:pointer; font-weight:600}
+.lang button.active{background:var(--pill-active); color:var(--text)}
+.back{display:inline-flex; align-items:center; gap:8px; color:var(--muted)}
+main{padding:20px 16px 48px}
+.hero{
+  display:grid; gap:16px; grid-template-columns:1fr;
+}
+@media(min-width:860px){ .hero{grid-template-columns: 360px 1fr} }
+.card{background:var(--card); border:1px solid var(--border); border-radius:16px; overflow:hidden}
+.pic{aspect-ratio:3/4; background:#0b0b0e; display:grid; place-items:center; color:#666; font-size:14px}
+.content{padding:18px}
+.badge{display:inline-flex; gap:6px; align-items:center; background:linear-gradient(90deg,#e4572e,#ff8a4c); color:#fff; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:700}
+.title{font-size:28px; margin:8px 0 6px}
+.sub{color:var(--muted)}
+.grid{display:grid; gap:12px; margin-top:16px}
+@media(min-width:640px){ .grid{grid-template-columns: 1fr 1fr} }
+.block{background:var(--card); border:1px solid var(--border); border-radius:16px; padding:16px}
+.block h3{margin:0 0 10px; font-size:16px; color:#fff}
+.dl{display:grid; grid-template-columns:1fr 2fr; gap:10px; font-size:14px}
+.dl div{padding:6px 0; border-bottom:1px dashed var(--border)}
+.dl div:nth-child(1n){color:var(--muted)}
+.note{font-size:13px; color:var(--muted); margin-top:10px}
+.cta{display:flex; gap:10px; flex-wrap:wrap; margin-top:16px}
+.cta a{background:#1e1e24; border:1px solid var(--border); padding:10px 14px; border-radius:12px; font-weight:700}
+footer{color:var(--muted); font-size:12px; padding:24px 16px 50px}
+.hide{display:none}
+/* ===========================
+   DEVICE-SPECIFIC LAYOUT TUNING
+   Paste at the end of your <style>
+   =========================== */
+
+/* Base mobile tweaks shared by all phones */
+@media (max-width: 450px){
+  header .top { gap: 10px }
+  h1 { font-size: 16px }
+  .wrap { padding: 12px }
+  .tools { gap: 8px; margin-top: 8px }
+  .search input { padding: 12px 12px 12px 40px; font-size: 14px; border-radius: 10px }
+  .lang { padding: 3px }
+  .lang button { padding: 6px 10px; font-size: 12px }
+  .cats button { padding: 9px 10px; font-size: 12px; border-radius: 10px }
+  .card { border-radius: 12px; }
+  .card div { font-size: 14px; line-height: 1.35 }
+  .badge { font-size: 11px; padding: 3px 8px }
+  #tipLine { font-size: 11px }
+}
+
+/* ---------------------------
+   iPhone 12 / iPhone 13 Pro
+   Logical width: ~390px
+   --------------------------- */
+@media screen and (max-width: 400px){
+  .search input { font-size: 15px }
+  .cats { gap: 6px }
+  .cats button { padding: 8px 9px }
+  .card { padding: 12px }
+  .label { font-size: 11px }
+  .foot { font-size: 11px }
+}
+
+/* ---------------------------
+   iPhone 16 Pro Max (large phones)
+   (catches ~430–440px logical widths)
+   Also good for Pixel “Large” widths.
+   --------------------------- */
+@media screen and (min-width: 401px) and (max-width: 450px){
+  .top { align-items: flex-start }
+  .search { flex-basis: 100% }
+  .cats { flex-basis: 100% }
+  .cats button { padding: 10px 12px; font-size: 13px }
+  .card { padding: 14px }
+  .card div { font-size: 15px }
+}
+
+/* ---------------------------
+   Google Pixel (common 412px width)
+   Fine-tune tap targets and density.
+   --------------------------- */
+@media screen and (min-width: 405px) and (max-width: 420px){
+  .lang button { padding: 7px 12px }
+  .search input { font-size: 16px }
+  .cats button { padding: 10px 14px }
+}
+
+/* ---------------------------
+   iPad (portrait & landscape)
+   Portrait 768–834, landscape 1024
+   --------------------------- */
+@media screen and (min-width: 768px) and (max-width: 1060px){
+  /* Give iPad a comfy two-column feel for cards */
+  .head { position: sticky; top: 78px }
+  .grid { gap: 16px }
+  /* Keep your existing responsive single-column card content,
+     but bump the type size for readability on tablets */
+  .card div { font-size: 15px }
+  .label { font-size: 12px }
+  .search input { font-size: 16px; padding: 14px 14px 14px 44px }
+  .cats button { padding: 10px 14px; font-size: 14px }
+}
+
+/* iPad landscape specific polish */
+@media screen and (min-width: 1024px) and (max-width: 1060px) and (orientation: landscape){
+  .wrap { max-width: 1100px }
+  .head { top: 84px }
+}
+
+/* ---------------------------
+   Very small phones safety net (older/SE)
+   --------------------------- */
+@media screen and (max-width: 340px){
+  .lang { display: none; } /* saves space; optional */
+  .cats button { padding: 7px 8px; font-size: 11px }
+  .search input { font-size: 14px }
+}
+
+/* ---------------------------
+   High DPI polish (Retina etc.)
+   --------------------------- */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi){
+  .card, .head { border-color: #2c2c35 }
+  .badge { filter: saturate(1.05) }
+}
+
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="top">
+      <a class="back" href="index.html">⬅︎ Back to menu</a>
+      <h1>🍷 Caffè Cuore — Wine</h1>
+      <div class="lang" id="langBar">
+        <button data-lang="en" class="active">English</button>
+        <button data-lang="de">Deutsch</button>
+        <button data-lang="bs">Bosanski</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <!-- IMAGE / BOTTLE -->
+    <div class="card">
+      <!-- Replace this gray box with your wine image if you have one -->
+      <div class="pic">
+        <span>Wine image<br/>(optional)</span>
+      </div>
+    </div>
+
+    <!-- TEXT -->
+    <div class="card content">
+      <!-- EN -->
+      <div class="i18n en">
+        <span class="badge">Red • Italy (Puglia)</span>
+        <h2 class="title">Masereto Primitivo Salento</h2>
+        <p class="sub">Producer: <strong>Masereto</strong> • Vintage: <strong>2024</strong></p>
+        <div class="grid">
+          <div class="block">
+            <h3>Tasting</h3>
+            <p>Full-bodied, warm, plum and dark cherry.</p>
+          </div>
+          <div class="block">
+            <h3>Food pairing</h3>
+            <p>Barbecue, spicy dishes, hard cheeses.</p>
+          </div>
+          <div class="block">
+            <h3>Details</h3>
+            <div class="dl">
+              <div>Country</div><div>Italy (Puglia)</div>
+              <div>Grape</div><div>Primitivo</div>
+              <div>Style</div><div>Dry red</div>
+              <div>Special</div><div>Magnum 1.5L – perfect for sharing</div>
+            </div>
+            <p class="note">Note: data matches the main menu entry.</p>
+          </div>
+          <div class="block">
+            <h3>About the producer</h3>
+            <p>Masereto works traditional Apulian varieties with a modern touch—ripe fruit and smooth tannins.</p>
+          </div>
+        </div>
+        <div class="cta">
+          <a href="index.html">← Back to menu</a>
+          <a href="#" onclick="window.history.back();return false;">⟲ Go back</a>
+        </div>
+      </div>
+
+      <!-- DE -->
+      <div class="i18n de hide">
+        <span class="badge">Rot • Italien (Apulien)</span>
+        <h2 class="title">Masereto Primitivo Salento</h2>
+        <p class="sub">Produzent: <strong>Masereto</strong> • Jahrgang: <strong>2024</strong></p>
+        <div class="grid">
+          <div class="block">
+            <h3>Geschmack</h3>
+            <p>Vollmundig, warm, Pflaume und dunkle Kirsche.</p>
+          </div>
+          <div class="block">
+            <h3>Speisenempfehlung</h3>
+            <p>Gegrilltes, würzige Speisen, Hartkäse.</p>
+          </div>
+          <div class="block">
+            <h3>Details</h3>
+            <div class="dl">
+              <div>Land</div><div>Italien (Apulien)</div>
+              <div>Rebsorte</div><div>Primitivo</div>
+              <div>Stil</div><div>Trocken, Rot</div>
+              <div>Besonderes</div><div>Magnum 1,5L – ideal zum Teilen</div>
+            </div>
+            <p class="note">Hinweis: Daten entsprechen dem Eintrag im Hauptmenü.</p>
+          </div>
+          <div class="block">
+            <h3>Über den Produzenten</h3>
+            <p>Masereto arbeitet mit apulischen Rebsorten in moderner Stilistik – reife Frucht, sanfte Tannine.</p>
+          </div>
+        </div>
+        <div class="cta">
+          <a href="index.html">← Zurück zum Menü</a>
+          <a href="#" onclick="window.history.back();return false;">⟲ Zurück</a>
+        </div>
+      </div>
+
+      <!-- BS -->
+      <div class="i18n bs hide">
+        <span class="badge">Crveno • Italija (Puglia)</span>
+        <h2 class="title">Masereto Primitivo Salento</h2>
+        <p class="sub">Proizvođač: <strong>Masereto</strong> • Godina: <strong>2024</strong></p>
+        <div class="grid">
+          <div class="block">
+            <h3>Okus</h3>
+            <p>Puno tijelo, toplo, šljive i tamne trešnje.</p>
+          </div>
+          <div class="block">
+            <h3>Uz hranu</h3>
+            <p>Roštilj, začinjena jela, tvrdi sirevi.</p>
+          </div>
+          <div class="block">
+            <h3>Detalji</h3>
+            <div class="dl">
+              <div>Zemlja</div><div>Italija (Puglia)</div>
+              <div>Sorta</div><div>Primitivo</div>
+              <div>Stil</div><div>Suho crveno</div>
+              <div>Posebno</div><div>Velika boca 1.5L — idealna za društvo</div>
+            </div>
+            <p class="note">Napomena: Podaci se poklapaju sa glavnim menijem.</p>
+          </div>
+          <div class="block">
+            <h3>O vinariji</h3>
+            <p>Masereto njeguje tradicionalne apulijske sorte u modernom stilu — zrelo voće i mekani tanini.</p>
+          </div>
+        </div>
+        <div class="cta">
+          <a href="index.html">← Nazad na meni</a>
+          <a href="#" onclick="window.history.back();return false;">⟲ Nazad</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap">
+  © Caffè Cuore • Wine detail
+</footer>
+
+<script>
+const langBar = document.getElementById('langBar');
+let currentLang = 'en';
+function switchLang(code){
+  document.querySelectorAll('.i18n').forEach(el=>el.classList.add('hide'));
+  document.querySelector('.i18n.'+code).classList.remove('hide');
+  [...langBar.children].forEach(b=>b.classList.remove('active'));
+  langBar.querySelector('[data-lang="'+code+'"]').classList.add('active');
+  currentLang = code;
+}
+langBar.addEventListener('click', (e)=>{
+  const btn = e.target.closest('button[data-lang]');
+  if(!btn) return;
+  switchLang(btn.dataset.lang);
+});
+</script>
+</body>
+</html>

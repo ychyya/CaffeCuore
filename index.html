@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Caffè Cuore — Menu</title>
+<style>
+:root{
+  --bg:#0f0f12; --card:#17171c; --muted:#9aa0a6; --text:#e9eaee; --accent:#e4572e;
+  --pill:#24242a; --pill-active:#2d2d35; --border:#2a2a32;
+}
+*{box-sizing:border-box}
+body{margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif; background:var(--bg); color:var(--text)}
+header{
+  position:sticky; top:0; z-index:10; backdrop-filter:saturate(1.2) blur(8px);
+  background:linear-gradient(180deg, rgba(15,15,18,.92), rgba(15,15,18,.75));
+  border-bottom:1px solid var(--border);
+}
+.wrap{max-width:1100px; margin:0 auto; padding:16px}
+.top{display:flex; gap:16px; align-items:center; justify-content:space-between; flex-wrap:wrap}
+h1{font-size:20px; margin:0; letter-spacing:.3px}
+.lang{display:flex; gap:8px; background:var(--pill); padding:4px; border-radius:999px; border:1px solid var(--border)}
+.lang button{border:0; background:transparent; color:var(--muted); padding:8px 14px; border-radius:999px; cursor:pointer; font-weight:600}
+.lang button.active{background:var(--pill-active); color:var(--text)}
+.tools{display:flex; gap:12px; width:100%; margin-top:12px; flex-wrap:wrap}
+.search{flex:1 1 340px; position:relative}
+.search input{
+  width:100%; padding:12px 14px 12px 42px; border-radius:12px; border:1px solid var(--border);
+  background:#121217; color:var(--text); outline:none;
+}
+.search .icon{position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--muted); pointer-events:none}
+.cats{display:flex; gap:8px; flex-wrap:wrap}
+.cats button{background:var(--pill); color:var(--muted); border:1px solid var(--border);
+  padding:10px 12px; border-radius:12px; cursor:pointer; font-weight:600}
+.cats button.active{background:var(--pill-active); color:var(--text); border-color:#3a3a44}
+.grid{display:grid; grid-template-columns:repeat(12,1fr); gap:14px; margin-top:16px}
+.card{
+  grid-column:span 12; background:var(--card); border:1px solid var(--border); border-radius:14px; padding:14px;
+  display:grid; gap:10px; align-items:center
+}
+.head{display:grid; gap:10px; color:var(--muted); font-weight:700; padding:10px 14px; border:1px dashed var(--border);
+  border-radius:12px; background:#14141a; position:sticky; top:82px; z-index:5}
+.badge{display:inline-flex; align-items:center; gap:6px; font-size:12px; color:#fff; background:linear-gradient(90deg,#e4572e,#ff8a4c); padding:4px 8px; border-radius:999px}
+.muted{color:var(--muted)}
+.foot{margin:20px 0 40px; color:var(--muted); font-size:12px}
+.label{display:none}
+@media (min-width: 981px){
+  .card{grid-template-columns:1.2fr 1fr 0.8fr 0.6fr 1.4fr 1.4fr 1.2fr}
+  .head{grid-template-columns:1.2fr 1fr 0.8fr 0.6fr 1.4fr 1.4fr 1.2fr}
+}
+@media (max-width: 980px){
+  .head{display:none}
+  .card{grid-template-columns:1fr}
+  .card div{border-top:1px dashed var(--border); padding-top:8px}
+  .card div:first-child{border-top:0; padding-top:0}
+  .label{display:block; font-size:12px; color:var(--muted); margin-bottom:4px}
+}
+.pillnote{font-size:12px; color:var(--muted)}
+/* Spirits layout overrides on desktop */
+.spirits .card{grid-template-columns:1.6fr 1fr 0.6fr 0.6fr 0.6fr 0.8fr 1.4fr}
+.spirits .head{grid-template-columns:1.6fr 1fr 0.6fr 0.6fr 0.6fr 0.8fr 1.4fr}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="top">
+      <h1>🍷 Caffè Cuore — Menu</h1>
+      <div class="lang" id="langBar">
+        <button data-lang="en" class="active">English</button>
+        <button data-lang="de">Deutsch</button>
+        <button data-lang="bs">Bosanski</button>
+      </div>
+      <div class="tools">
+        <div class="search">
+          <span class="icon">🔎</span>
+          <input id="searchInput" placeholder="Search wines, producer, country, taste..." />
+        </div>
+        <div class="cats" id="cats">
+          <button data-cat="white" class="active">White</button>
+          <button data-cat="red">Red</button>
+          <button data-cat="rose">Rosé</button>
+          <button data-cat="prosecco">Prosecco</button>
+          <button data-cat="spirits">Spirituosen</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" id="mainWrap">
+  <div class="head" id="headRow">
+    <!-- labels will be inserted by JS -->
+  </div>
+  <div class="grid" id="grid"></div>
+  <div class="foot" id="count"></div>
+  <p class="pillnote" id="tipLine">Tip: Start typing “Riesling”, “Veneto”, “citrus”, “sushi”, “rum”…</p>
+</main>
+
+<script>
+/* ================== I18N ================== */
+const LABELS = {
+  en: {
+    searchPH:"Search wines, producer, country, taste...",
+    // wine headers
+    name:"Name", producer:"Producer", country:"Country", vintage:"Vintage", taste:"Taste", food:"Food Pairing", special:"Special",
+    // spirits headers
+    s_name:"Name", s_style:"Type/Style", s_abv:"ABV", s_vol:"Volume", s_price:"Price", s_origin:"Origin", s_notes:"Notes",
+    // categories
+    white:"White", red:"Red", rose:"Rosé", prosecco:"Prosecco", spirits:"Spirits",
+    // counts
+    shown_wines:"wines shown", shown_spirits:"spirits shown"
+  },
+  de: {
+    searchPH:"Suche nach Wein, Produzent, Land, Geschmack...",
+    name:"Weinname", producer:"Produzent", country:"Land", vintage:"Jahrgang", taste:"Geschmack", food:"Speisenempfehlung", special:"Besonderes",
+    s_name:"Name", s_style:"Art/Stil", s_abv:"Alk.%", s_vol:"Inhalt", s_price:"Preis", s_origin:"Herkunft", s_notes:"Hinweise",
+    white:"Weiß", red:"Rot", rose:"Rosé", prosecco:"Prosecco", spirits:"Spirituosen",
+    shown_wines:"Weine angezeigt", shown_spirits:"Spirituosen angezeigt"
+  },
+  bs: {
+    searchPH:"Pretraga: vino, proizvođač, zemlja, okus...",
+    name:"Ime vina", producer:"Proizvođač", country:"Zemlja", vintage:"Godina", taste:"Okus", food:"Uz hranu", special:"Posebno",
+    s_name:"Naziv", s_style:"Tip/Stil", s_abv:"Alk.%", s_vol:"Količina", s_price:"Cijena", s_origin:"Porijeklo", s_notes:"Napomene",
+    white:"Bijelo", red:"Crveno", rose:"Rosé", prosecco:"Prosecco", spirits:"Žestoka pića",
+    shown_wines:"vina prikazano", shown_spirits:"pića prikazano"
+  }
+};
+
+let currentLang = 'en';
+let currentCat = 'white';
+let query = '';
+
+/* ================== DATA (ALL CATEGORIES) ==================
+   — White / Red / Rosé pulled from your PDFs (EN/DE/BS).
+   — Prosecco contains Prosecco Rosé items from your rosé tables.
+   — Spirits list from your earlier message (translated).
+*/
+const ITEMS = [
+
+  /* ---------- WHITE ---------- */
+  // (From Whitewine english.pdf, Weißwein german.pdf, bijelovino bosanski.pdf)
+  {id:"white_herzpochen_riesling",category:"white",
+    en:{name:"Herzpochen Riesling Dry",producer:"Anselmann",country:"Germany (Pfalz)",vintage:"2023",
+        taste:"Fresh, citrus, green apple, dry",food:"Fish, salads, light dishes",special:"Classic dry German Riesling"},
+    de:{name:"Herzpochen Riesling Trocken",producer:"Anselmann",country:"Deutschland (Pfalz)",vintage:"2023",
+        taste:"Frisch, Zitrus, grüner Apfel, trocken",food:"Fisch, Salate, leichte Gerichte",special:"Klassischer deutscher Riesling trocken"},
+    bs:{name:"Herzpochen Riesling Trocken",producer:"Anselmann",country:"Njemačka (Pfalz)",vintage:"2023",
+        taste:"Svježe, citrus, zelena jabuka, suho",food:"Ribe, salate, lagana jela",special:"Klasičan suhi njemački Riesling"} },
+  {id:"white_riesling_classic_karl_may",category:"white",
+    en:{name:"Riesling Classic",producer:"Karl May",country:"Germany (Rheinhessen)",vintage:"2023",
+        taste:"Fruity, citrus, elegant freshness",food:"Asian dishes, poultry, sushi",special:"Rated 91 points (Falstaff)"},
+    de:{name:"Riesling Classic",producer:"Karl May",country:"Deutschland (Rheinhessen)",vintage:"2023",
+        taste:"Fruchtig, Zitrus, elegante Frische",food:"Asiatische Küche, Geflügel, Sushi",special:"Mit 91 Punkten (Falstaff)"},
+    bs:{name:"Riesling Classic",producer:"Karl May",country:"Njemačka (Rheinhessen)",vintage:"2023",
+        taste:"Voćno, citrus, elegantna svježina",food:"Azijska jela, bijelo meso, sushi",special:"Ocijenjen sa 91 poen (Falstaff)"} },
+  {id:"white_weisswein_ellermann_spiegel",category:"white",
+    en:{name:"White Wine",producer:"Ellermann-Spiegel",country:"Germany (Pfalz)",vintage:"2020",
+        taste:"Tropical fruit, pear, fresh",food:"Chicken, vegetable pasta",special:"Modern Pfalz style"},
+    de:{name:"Weisswein",producer:"Ellermann-Spiegel",country:"Deutschland (Pfalz)",vintage:"2020",
+        taste:"Tropische Früchte, Birne, frisch",food:"Huhn, Pasta mit Gemüse",special:"Moderner Pfalz-Stil"},
+    bs:{name:"Weisswein",producer:"Ellermann-Spiegel",country:"Njemačka (Pfalz)",vintage:"2020",
+        taste:"Tropsko voće, kruška, svježina",food:"Piletina, tjestenina s povrćem",special:"Moderni Pfalz stil"} },
+  {id:"white_lugana_casello_bondoni",category:"white",
+    en:{name:"Lugana",producer:"Casello Bondoni",country:"Italy (Lombardy)",vintage:"2024",
+        taste:"Mineral, floral, lemon",food:"Fish, seafood",special:"Typical Lake Garda Lugana"},
+    de:{name:"Lugana",producer:"Casello Bondoni",country:"Italien (Lombardei)",vintage:"2024",
+        taste:"Mineralisch, blumig, Zitrone",food:"Fisch, Meeresfrüchte",special:"Typischer Gardasee-Lugana"},
+    bs:{name:"Lugana",producer:"Casello Bondoni",country:"Italija (Lombardija)",vintage:"2024",
+        taste:"Mineralno, cvjetno, limun",food:"Riba, morske školjke",special:"Popularan stil s Gardskog jezera"} },
+  {id:"white_chardonnay_antica_masseria",category:"white",
+    en:{name:"Chardonnay",producer:"Antica Masseria Colleone",country:"Italy (Puglia)",vintage:"2024",
+        taste:"Soft, fruity, vanilla",food:"Creamy pasta, chicken",special:"Southern Chardonnay"},
+    de:{name:"Chardonnay",producer:"Antica Masseria Colleone",country:"Italien (Apulien)",vintage:"2024",
+        taste:"Weich, fruchtig, Vanille",food:"Sahnepasta, Geflügel",special:"Südlicher Chardonnay"},
+    bs:{name:"Chardonnay",producer:"Antica Masseria Colleone",country:"Italija (Puglia)",vintage:"2024",
+        taste:"Mekano, voćno, vanilija",food:"Pasta s vrhnjem, piletina",special:"Južnjački Chardonnay"} },
+  {id:"white_pinot_grigio_antonutti",category:"white",
+    en:{name:"Pinot Grigio",producer:"Antonutti",country:"Italy (Friuli)",vintage:"2024",
+        taste:"Light, apple, fresh",food:"Salads, light dishes",special:"Typical Friuli Pinot Grigio"},
+    de:{name:"Pinot Grigio",producer:"Antonutti",country:"Italien (Friaul)",vintage:"2024",
+        taste:"Leicht, Apfel, frisch",food:"Salate, leichte Gerichte",special:"Typischer Friaul Pinot Grigio"},
+    bs:{name:"Pinot Grigio",producer:"Antonutti",country:"Italija (Friuli)",vintage:"2024",
+        taste:"Lagano, jabuka, svježe",food:"Salate, lagana jela",special:"Tipičan friulanski Pinot Grigio"} },
+{id:"white_chardonnay_antonutti",category:"white",
+    en:{name:"Chardonnay",producer:"Antonutti",country:"Italy (Friuli)",vintage:"2024",
+        taste:"Fruity, light vanilla, soft",food:"Pasta, chicken, cheese",special:"Typical Friuli Chardonnay"},
+    de:{name:"Chardonnay",producer:"Antonutti",country:"Italien (Friaul)",vintage:"2024",
+        taste:"Fruchtig, leichte Vanille, weich",food:"Pasta, Geflügel, Käse",special:"Typischer Friaul Chardonay"},
+    bs:{name:"Chardonnay",producer:"Antonutti",country:"Italija (Friuli)",vintage:"2024",
+        taste:"Voćno, blaga vanilija, mekano",food:"Pasta, piletina, sirevi",special:"Tipičan friulanski Chardonnay"} },
+        {id:"white_sauvignon_antonutti",category:"white",
+    en:{name:"Sauvignon",producer:"Antonutti",country:"Italy (Friuli)",vintage:"2024",
+        taste:"Herbal, green apple, citrus",food:"Fish, shellfish, light dishes",special:"Aromatic Sauvignon from Friuli"},
+    de:{name:"Sauvignon",producer:"Antonutti",country:"Italien (Friaul)",vintage:"2024",
+        taste:"Kräuter, grüner Apfel, Zitrus",food:"Fisch, Muscheln, leichte Gerichte",special:"Aromatischer Sauvignon aus Friaul"},
+    bs:{name:"Sauvignon",producer:"Antonutti",country:"Italija (Friuli)",vintage:"2024",
+        taste:"Herbalno, zelena jabuka, citrus",food:"Ribe, školjke, lagana jela",special:"Aromatičan Sauvignon iz Friulija"} },
+  {id:"white_torfel_2023_feliciana",category:"white",
+    en:{name:"Torfel",producer:"Feliciana",country:"Italy (Lombardy)",vintage:"2023",
+        taste:"Citrus, floral, mineral",food:"Fish, vegetables",special:"Boutique Lugana producer"},
+    de:{name:"Torfel",producer:"Feliciana",country:"Italien (Lombardei)",vintage:"2023",
+        taste:"Zitrus, Blüten, mineralisch",food:"Fisch, Gemüse",special:"Boutique Lugana Produzent"},
+    bs:{name:"Torfel",producer:"Feliciana",country:"Italija (Lombardija)",vintage:"2023",
+        taste:"Citrus, cvijet, mineralno",food:"Riba, povrće",special:"Boutique Lugana proizvođač"} },
+ {id:"white_torfel_2024_feliciana",category:"white",
+    en:{name:"Torfel",producer:"Feliciana",country:"Italy (Lombardy)",vintage:"2024",
+        taste:"Fruity, mineral, fresh",food:"Light dishes, shellfish, vegetabless",special:"Elegant Lugana wine"},
+    de:{name:"Torfel",producer:"Feliciana",country:"Italien (Lombardei)",vintage:"2024",
+        taste:"Fruchtig, mineralisch, frisch",food:"Leichte Speisen, Muscheln, Gemüse",special:"Elegantes Lugana-Wein"},
+    bs:{name:"Torfel",producer:"Feliciana",country:"Italija (Lombardija)",vintage:"2024",
+        taste:"Voćno, mineralno, svježe",food:"Lagana jela, školjke, povrće",special:"Elegantno Lugana vino"} },
+        {id:"white_felugan_feliciana",category:"white",
+    en:{name:"Felugan",producer:"Feliciana",country:"Italy (Lombardy)",vintage:"2024",
+        taste:"Citrus, floral, light almond",food:"Fish, starters, vegetarian dishes",special:"Special Lugana line"},
+    de:{name:"Felugan",producer:"Feliciana",country:"Italien (Lombardei)",vintage:"2024",
+        taste:"Zitrus, blumig, leichte Mandel",food:"Fisch, Vorspeisen, vegetarische Küche",special:"Spezielle Lugana-Linie"},
+    bs:{name:"Felugan",producer:"Feliciana",country:"Italija (Lombardija)",vintage:"2024",
+        taste:"Citrus, cvjetno, blagi badem",food:"Riba, predjela, vegetarijanska jela",special:"Posebna linija Lugana vina"} },
+  {id:"white_pinot_grigio_cornaro",category:"white",
+    en:{name:"Pinot Grigio",producer:"Cornaro",country:"Italy (Veneto)",vintage:"2024",
+        taste:"Light, fresh, easy-drinking",food:"Starters, light dishes",special:"Magnum 1.5L bottle"},
+    de:{name:"Pinot Grigio",producer:"Cornaro",country:"Italien (Venetien)",vintage:"2024",
+        taste:"Leicht, frisch, süffig",food:"Vorspeisen, leichte Gerichte",special:"Magnum 1,5L Flasche"},
+    bs:{name:"Pinot Grigio",producer:"Cornaro",country:"Italija (Veneto)",vintage:"2024",
+        taste:"Lagano, svježe, pitko",food:"Predjela, lagana jela",special:"Magnum 1.5L boca"} },
+  {id:"white_pinot_grigio_donini",category:"white",
+    en:{name:"Pinot Grigio",producer:"Donini",country:"Italy (Veneto)",vintage:"2024",
+        taste:"Light, fruity",food:"Starters, salads",special:"Magnum 1.5L bottle"},
+    de:{name:"Pinot Grigio",producer:"Donini",country:"Italien (Venetien)",vintage:"2024",
+        taste:"Leicht, fruchtig",food:"Vorspeisen, Salate",special:"Magnum 1,5L Flasche"},
+    bs:{name:"Pinot Grigio",producer:"Donini",country:"Italija (Veneto)",vintage:"2024",
+        taste:"Lagano, voćno",food:"Predjela, salate",special:"Magnum 1.5L boca"} },
+  {id:"white_chardonnay_cornaro",category:"white",
+    en:{name:"Chardonnay",producer:"Cornaro",country:"Italy (Veneto)",vintage:"NV",
+        taste:"Fruity, fresh",food:"White meat, cheese",special:"Magnum 1.5L bottle"},
+    de:{name:"Chardonnay",producer:"Cornaro",country:"Italien (Venetien)",vintage:"NV",
+        taste:"Fruchtig, frisch",food:"Helles Fleisch, Käse",special:"Magnum 1,5L Flasche"},
+    bs:{name:"Chardonnay",producer:"Cornaro",country:"Italija (Veneto)",vintage:"NV",
+        taste:"Voćno, svježe",food:"Bijelo meso, sirevi",special:"Magnum 1.5L boca"} },
+  {id:"white_chardonnay_donini",category:"white",
+    en:{name:"Chardonnay",producer:"Donini",country:"Italy (Veneto)",vintage:"2023",
+        taste:"Soft, light vanilla",food:"Pasta, poultry",special:"Magnum 1.5L bottle"},
+    de:{name:"Chardonnay",producer:"Donini",country:"Italien (Venetien)",vintage:"2023",
+        taste:"Weich, leichte Vanille",food:"Pasta, Geflügel",special:"Magnum 1,5L Flasche"},
+    bs:{name:"Chardonnay",producer:"Donini",country:"Italija (Veneto)",vintage:"2023",
+        taste:"Mekano, blaga vanilija",food:"Pasta, piletina",special:"Magnum 1.5L boca"} },
+  {id:"white_sauvignon_sonia",category:"white",
+    en:{name:"Sauvignon",producer:"Sonia",country:"Italy",vintage:"NV",
+        taste:"Herbal, fresh",food:"Fish, vegetables, light cuisine",special:"Fresh and easy-drinking"},
+    de:{name:"Sauvignon",producer:"Sonia",country:"Italien",vintage:"NV",
+        taste:"Kräuter, frisch",food:"Fisch, Gemüse, leichte Küche",special:"Frisch und süffig"},
+    bs:{name:"Sauvignon",producer:"Sonia",country:"Italija",vintage:"NV",
+        taste:"Herbalno, svježe",food:"Riba, povrće, lagana jela",special:"Svjež i pitak"} },
+  {id:"white_chardonnay_rive_della_chiesa",category:"white",
+    en:{name:"Chardonnay",producer:"Rive della Chiesa",country:"Italy (Veneto)",vintage:"2023",
+        taste:"Fruity, pear, elegant",food:"Poultry, pasta",special:"Modern interpretation"},
+    de:{name:"Chardonnay",producer:"Rive della Chiesa",country:"Italien (Venetien)",vintage:"2023",
+        taste:"Fruchtig, Birne, elegant",food:"Geflügel, Pasta",special:"Moderne Interpretation"},
+    bs:{name:"Chardonnay",producer:"Rive della Chiesa",country:"Italija (Veneto)",vintage:"2023",
+        taste:"Voćno, kruška, elegantno",food:"Piletina, paste",special:"Moderna interpretacija"} },
+{id:"white_pinot_grigio_rive_della_chiesa",category:"white",
+    en:{name:"Pinot Grigio",producer:"Rive della Chiesa",country:"Italy (Veneto)",vintage:"2022",
+        taste:"Fresh, light, citrus, apple",food:"Starters, light salads, fish",special:"Classic Venetian Pinot Grigio"},
+    de:{name:"Pinot Grigio",producer:"Rive della Chiesa",country:"Italien (Venetien)",vintage:"2022",
+        taste:"Frisch, leicht, Zitrus, Apfel",food:"Vorspeisen, leichte Salate, Fisch",special:"Klassischer venetischer Pinot Grigio"},
+    bs:{name:"Pinot Grigio",producer:"Rive della Chiesa",country:"Italija (Veneto)",vintage:"2022",
+        taste:"Svježe, lagano, citrus, jabuka",food:"Predjela, lagane salate, riba",special:"Klasičan venetski Pinot Grigio"} },
+  {id:"white_sauvignon_casali_maniago",category:"white",
+    en:{name:"Sauvignon",producer:"Casali Maniago",country:"Italy (Friuli)",vintage:"2021",
+        taste:"Green apple, herbal, citrus",food:"Fish, shellfish",special:"Friuli Sauvignon"},
+    de:{name:"Sauvignon",producer:"Casali Maniago",country:"Italien (Friaul)",vintage:"2021",
+        taste:"Grüner Apfel, Kräuter, Zitrus",food:"Fisch, Muscheln",special:"Friauler Sauvignon"},
+    bs:{name:"Sauvignon",producer:"Casali Maniago",country:"Italija (Friuli)",vintage:"2021",
+        taste:"Zelena jabuka, herbalno, citrus",food:"Ribe, školjke",special:"Friulanski Sauvignon"} },
+  {id:"white_bianco_bologna_gaggioli",category:"white",
+    en:{name:"Bianco Bologna",producer:"Gaggioli",country:"Italy (Emilia-Romagna)",vintage:"2021",
+        taste:"Fresh, fruity",food:"Starters, pasta",special:"Regional specialty"},
+    de:{name:"Bianco Bologna",producer:"Gaggioli",country:"Italien (Emilia-Romagna)",vintage:"2021",
+        taste:"Frisch, fruchtig",food:"Vorspeisen, Pasta",special:"Regionale Spezialität"},
+    bs:{name:"Bianco Bologna",producer:"Gaggioli",country:"Italija (Emilia-Romagna)",vintage:"2021",
+        taste:"Svježe, voćno",food:"Predjela, paste",special:"Regionalni specijalitet"} },
+  {id:"white_millesimato_undici_sanmartino",category:"white",
+    en:{name:"Millesimato Undici",producer:"Sanmartino",country:"Italy (Veneto)",vintage:"2022",
+        taste:"Fresh, fruity, sparkling",food:"Aperitif, light dishes",special:"Magnum 1.5L sparkling wine"},
+    de:{name:"Millesimato Undici",producer:"Sanmartino",country:"Italien (Venetien)",vintage:"2022",
+        taste:"Frisch, fruchtig, perlend",food:"Aperitif, leichte Gerichte",special:"Magnum 1,5L Schaumwein"},
+    bs:{name:"Millesimato Undici",producer:"Sanmartino",country:"Italija (Veneto)",vintage:"2022",
+        taste:"Svježe, voćno, pjenušavo",food:"Aperitiv, lagana jela",special:"Magnum 1.5L pjenušac"} },
+  {id:"white_garganega_negrar",category:"white",
+    en:{name:"Garganega",producer:"Cantina di Negrar",country:"Italy (Veneto)",vintage:"2020",
+        taste:"Light, fruity, almond",food:"Starters, vegetarian dishes",special:"Native variety from Veneto"},
+    de:{name:"Garganega",producer:"Cantina di Negrar",country:"Italien (Venetien)",vintage:"2020",
+        taste:"Leicht, fruchtig, Mandel",food:"Vorspeisen, vegetarische Küche",special:"Autochthone Sorte aus Venetien"},
+    bs:{name:"Garganega",producer:"Cantina di Negrar",country:"Italija (Veneto)",vintage:"2020",
+        taste:"Lagano, voćno, badem",food:"Predjela, vegetarijanska jela",special:"Autohtona sorta iz Veneta"} },
+  {id:"white_custoza_negrar",category:"white",
+    en:{name:"Custoza",producer:"Cantina di Negrar",country:"Italy (Veneto)",vintage:"2020",
+        taste:"Floral, fresh, mineral",food:"Light dishes, fish",special:"Classic white blend from Veneto"},
+    de:{name:"Custoza",producer:"Cantina di Negrar",country:"Italien (Venetien)",vintage:"2020",
+        taste:"Blumig, frisch, mineralisch",food:"Leichte Gerichte, Fisch",special:"Klassischer Weißwein-Blend"},
+    bs:{name:"Custoza",producer:"Cantina di Negrar",country:"Italija (Veneto)",vintage:"2020",
+        taste:"Cvjetno, svježe, mineralno",food:"Lagana jela, ribe",special:"Klasičan bijeli blend iz Veneta"} },
+  {id:"white_negroamaro_bianco_temerano",category:"white",
+    en:{name:"Negroamaro Bianco",producer:"Temerano",country:"Italy (Puglia)",vintage:"2021",
+        taste:"Unusual, fruity, fresh",food:"Salads, fish",special:"White version of a red grape"},
+    de:{name:"Negroamaro Bianco",producer:"Temerano",country:"Italien (Apulien)",vintage:"2021",
+        taste:"Ungewöhnlich, fruchtig, frisch",food:"Salate, Fisch",special:"Weiße Variante einer roten Sorte"},
+    bs:{name:"Negroamaro Bianco",producer:"Temerano",country:"Italija (Puglia)",vintage:"2021",
+        taste:"Neobično, voćno, svježe",food:"Salate, riba",special:"Bijela varijanta crne sorte"} },
+  {id:"white_chardonnay_barrique_dalvina",category:"white",
+    en:{name:"Chardonnay Barrique",producer:"Dalvina",country:"North Macedonia",vintage:"2015",
+        taste:"Vanilla, toast, rich",food:"Aged cheese, meat dishes",special:"Aged in oak barrels"},
+    de:{name:"Chardonnay Barrique",producer:"Dalvina",country:"Nordmazedonien",vintage:"2015",
+        taste:"Vanille, Toast, reichhaltig",food:"Gereifter Käse, Fleischgerichte",special:"Im Eichenfass gereift"},
+    bs:{name:"Chardonnay Barrique",producer:"Dalvina",country:"Sjeverna Makedonija",vintage:"2015",
+        taste:"Vanilija, tost, bogato",food:"Odležani sirevi, mesna jela",special:"Odležano u hrastovim bačvama"} },
+  {id:"white_chardonnay_kupidon",category:"white",
+    en:{name:"Chardonnay",producer:"Kupidon",country:"North Macedonia",vintage:"2014",
+        taste:"Mature, soft, fruity",food:"Hearty dishes, cheese",special:"Older Chardonnay"},
+    de:{name:"Chardonnay",producer:"Kupidon",country:"Nordmazedonien",vintage:"2014",
+        taste:"Gereift, weich, fruchtig",food:"Kräftige Gerichte, Käse",special:"Älterer Chardonnay"},
+    bs:{name:"Chardonnay",producer:"Kupidon",country:"Sjeverna Makedonija",vintage:"2014",
+        taste:"Zrelo, mekano, voćno",food:"Jaka jela, sirevi",special:"Stariji Chardonnay"} },
+  {id:"white_grasevina_ilocki_podrumi",category:"white",
+    en:{name:"Graševina",producer:"Iločki Podrumi",country:"Croatia",vintage:"2023",
+        taste:"Fresh, light, floral",food:"Light meals, starters",special:"Small bottle 0.187L"},
+    de:{name:"Graševina",producer:"Iločki Podrumi",country:"Kroatien",vintage:"2023",
+        taste:"Frisch, leicht, blumig",food:"Leichte Speisen, Vorspeisen",special:"Kleine Flasche 0,187L"},
+    bs:{name:"Graševina",producer:"Iločki Podrumi",country:"Hrvatska",vintage:"2023",
+        taste:"Svježe, lagano, cvjetno",food:"Laka jela, predjela",special:"Mala boca 0.187L"} },
+
+  /* ---------- RED ---------- */
+  // (From redwine english.pdf, Rotwein German.pdf, crvenovino bosanski.pdf)
+  {id:"red_masereto_primitivo_salento_2024",category:"red",
+    en:{name:"Masereto Primitivo Salento",producer:"Masereto",country:"Italy (Puglia)",vintage:"2024",
+        taste:"Full-bodied, warm, plum and dark cherry",food:"Barbecue, spicy dishes, hard cheeses",special:"Magnum bottle 1.5L – perfect for sharing"},
+    de:{name:"Masereto Primitivo Salento",producer:"Masereto",country:"Italien (Apulien)",vintage:"2024",
+        taste:"Kräftig, warm, Pflaume und dunkle Kirsche",food:"Gegrilltes, würzige Speisen, Hartkäse",special:"Magnumflasche 1,5L – ideal zum Teilen"},
+    bs:{name:"Masereto Primitivo Salento",producer:"Masereto",country:"Italija (Puglia)",vintage:"2024",
+        taste:"Pun, topao, šljive i tamne trešnje",food:"Roštilj, začinjena jela, tvrdi sirevi",special:"Velika boca 1.5L, idealna za društvo"} },
+  {id:"red_dornfelder_anselmann_2022",category:"red",
+    en:{name:"Dornfelder Dry",producer:"Anselmann",country:"Germany (Pfalz)",vintage:"2022",
+        taste:"Fruity, berry aromas, dry",food:"Poultry, pasta with mushrooms, cheese",special:"Typical German variety, fresh and light"},
+    de:{name:"Dornfelder trocken",producer:"Anselmann",country:"Deutschland (Pfalz)",vintage:"2022",
+        taste:"Fruchtig, Beerenaromen, trocken",food:"Geflügel, Pasta mit Pilzen, Käse",special:"Typische deutsche Rebsorte, frisch und leicht"},
+    bs:{name:"Dornfelder trocken",producer:"Anselmann",country:"Njemačka (Pfalz)",vintage:"2022",
+        taste:"Voćno, bobičasto, suho",food:"Perad, tjestenine s gljivama, sirevi",special:"Tipična njemačka sorta, svježa i pitka"} },
+  {id:"red_le_chiaie_cannonau_2007",category:"red",
+    en:{name:"Le Chiaie Cannonau di Sardegna",producer:"Le Chiaie",country:"Italy (Sardinia)",vintage:"2007",
+        taste:"Mature, dried fruits, spices",food:"Lamb, Mediterranean cuisine, aged cheese",special:"Cannonau = Grenache; older vintage"},
+    de:{name:"Le Chiaie Cannonau di Sardegna",producer:"Le Chiaie",country:"Italien (Sardinien)",vintage:"2007",
+        taste:"Gereift, Trockenfrüchte, Gewürze",food:"Lamm, mediterrane Küche, gereifter Käse",special:"Cannonau = Grenache; alte Jahrgang"},
+    bs:{name:"Le Chiaie Cannonau di Sardegna",producer:"Le Chiaie",country:"Italija (Sardinija)",vintage:"2007",
+        taste:"Zrelo, suho voće, začini",food:"Janjetina, mediteranska jela, zreli sirevi",special:"Cannonau = Grenache; starija berba"} },
+  {id:"red_poseydon_rosso_salento_2013",category:"red",
+    en:{name:"Poseydon Rosso del Salento",producer:"Poseydon",country:"Italy (Puglia)",vintage:"2013",
+        taste:"Fruity, spicy, soft tannins",food:"Pizza, pasta with tomato sauce",special:"Aged, smoother structure"},
+    de:{name:"Poseydon Rosso del Salento",producer:"Poseydon",country:"Italien (Apulien)",vintage:"2013",
+        taste:"Fruchtig, würzig, weiche Tannine",food:"Pizza, Pasta mit Tomatensauce",special:"Gereift, runde Struktur"},
+    bs:{name:"Poseydon Rosso del Salento",producer:"Poseydon",country:"Italija (Puglia)",vintage:"2013",
+        taste:"Voćno, začinsko, mekani tanini",food:"Pizza, tjestenine s rajčicom",special:"Duže odležavanje, mekša struktura"} },
+  {id:"red_caronesca_colio_merlot_2002",category:"red",
+    en:{name:"Ca´Ronesca Colio Merlot",producer:"Ca´Ronesca",country:"Italy (Friuli)",vintage:"2002",
+        taste:"Mature Merlot, blackcurrant, full-bodied",food:"Roasts, cheese",special:"Very old vintage, rare"},
+    de:{name:"Ca´Ronesca Colio Merlot",producer:"Ca´Ronesca",country:"Italien (Friaul)",vintage:"2002",
+        taste:"Reifer Merlot, schwarze Johannisbeere, vollmundig",food:"Braten, Käse",special:"Sehr alter Jahrgang, selten"},
+    bs:{name:"Ca´Ronesca Colio Merlot",producer:"Ca´Ronesca",country:"Italija (Friuli)",vintage:"2002",
+        taste:"Zreli Merlot, crna ribizla, bogat",food:"Pečena jela, sirevi",special:"Stara berba, rijetko dostupna"} },
+  {id:"red_montebaldo_bardolino_2021",category:"red",
+    en:{name:"Montebaldo Bardolino",producer:"Tenuta la Presa",country:"Italy (Veneto)",vintage:"2021",
+        taste:"Light, cherry, spice",food:"Light pasta, pizza",special:"Classic Bardolino"},
+    de:{name:"Montebaldo Bardolino",producer:"Tenuta la Presa",country:"Italien (Venetien)",vintage:"2021",
+        taste:"Leicht, Kirsche, Gewürze",food:"Leichte Pasta, Pizza",special:"Klassischer Bardolino"},
+    bs:{name:"Montebaldo Bardolino",producer:"Tenuta la Presa",country:"Italija (Veneto)",vintage:"2021",
+        taste:"Lagano, višnje, začini",food:"Lagane tjestenine, pizza",special:"Klasičan stil iz Veneta"} },
+  {id:"red_lacryma_christi_rosso_2023",category:"red",
+    en:{name:"Lacryma Christi Rosso",producer:"Rossana Forno Vesu",country:"Italy (Campania)",vintage:"2023",
+        taste:"Mineral, fruity, elegant",food:"Mediterranean cuisine, pizza, grilled meat",special:"Legendary wine from Naples bay"},
+    de:{name:"Lacryma Christi Rosso",producer:"Rossana Forno Vesu",country:"Italien (Kampanien)",vintage:"2023",
+        taste:"Mineralisch, fruchtig, elegant",food:"Mediterrane Küche, Pizza, Grillgerichte",special:"Legendärer Wein vom Golf von Neapel"},
+    bs:{name:"Lacryma Christi Rosso",producer:"Rossana Forno Vesu",country:"Italija (Kampanija)",vintage:"2023",
+        taste:"Mineralno, voćno, elegantno",food:"Mediteranska kuhinja, pizza, meso s roštilja",special:"Legendarno vino s Napuljskog zaljeva"} },
+  {id:"red_rosso_veneto_pasqua_2021",category:"red",
+    en:{name:"Rosso Veneto IGT",producer:"Familia Pasqua",country:"Italy (Veneto)",vintage:"2021",
+        taste:"Berry, spicy, balanced",food:"Pasta, grilled meat",special:"Pasqua – well-known Verona winery"},
+    de:{name:"Rosso Veneto IGT",producer:"Familia Pasqua",country:"Italien (Venetien)",vintage:"2021",
+        taste:"Beerig, würzig, ausgewogen",food:"Pasta, Grillfleisch",special:"Pasqua – bekannte Veroneser Kellerei"},
+    bs:{name:"Rosso Veneto IGT",producer:"Familia Pasqua",country:"Italija (Veneto)",vintage:"2021",
+        taste:"Bobičasto voće, začini, uravnoteženo",food:"Paste, meso sa žara",special:"Pasqua – poznata veronska vinarija"} },
+  {id:"red_carpinetto_originale_2025",category:"red",
+    en:{name:"Carpinetto Originale",producer:"Carpinetto",country:"Italy (Tuscany)",vintage:"2025",
+        taste:"Fruity, slightly spicy",food:"Beef, grilled meat",special:"Modern interpretation, new vintage"},
+    de:{name:"Carpinetto Originale",producer:"Carpinetto",country:"Italien (Toskana)",vintage:"2025",
+        taste:"Fruchtig, leicht würzig",food:"Rindfleisch, Grillfleisch",special:"Moderne Interpretation, neue Jahrgang"},
+    bs:{name:"Carpinetto Originale",producer:"Carpinetto",country:"Italija (Toskana)",vintage:"2025",
+        taste:"Voćno, blagi začini",food:"Crveno meso, meso sa žara",special:"Nova berba, moderno vino"} },
+  {id:"red_persempre_terre_gaie_2021",category:"red",
+    en:{name:"Persempre",producer:"Terre Gaie",country:"Italy (Veneto)",vintage:"2021",
+        taste:"Intense, rich, long finish",food:"Cheese, meat dishes",special:"Contemporary style"},
+    de:{name:"Persempre",producer:"Terre Gaie",country:"Italien (Venetien)",vintage:"2021",
+        taste:"Intensiv, reichhaltig, langer Abgang",food:"Käse, Fleischgerichte",special:"Moderne Weinstilistik"},
+    bs:{name:"Persempre",producer:"Terre Gaie",country:"Italija (Veneto)",vintage:"2021",
+        taste:"Intenzivno, bogato, dug završetak",food:"Sirevi, mesna jela",special:"Moderni stil"} },
+  {id:"red_merlot_veneto_cornaro_nv",category:"red",
+    en:{name:"Merlot Veneto",producer:"Cornaro",country:"Italy (Veneto)",vintage:"NV",
+        taste:"Juicy, fruity, soft",food:"Light meat dishes, cheese",special:"Magnum 1.5L"},
+    de:{name:"Merlot Veneto",producer:"Cornaro",country:"Italien (Venetien)",vintage:"NV",
+        taste:"Saftig, fruchtig, weich",food:"Leichte Fleischgerichte, Käse",special:"Magnumflasche 1,5L"},
+    bs:{name:"Merlot Veneto",producer:"Cornaro",country:"Italija (Veneto)",vintage:"NV",
+        taste:"Sočan Merlot, voćno, mekano",food:"Lagana mesna jela, sirevi",special:"Velika boca 1.5L"} },
+  {id:"red_appassimento_squarcione_2021",category:"red",
+    en:{name:"Appassimento Rosso",producer:"Squarcione",country:"Italy (Veneto)",vintage:"2021",
+        taste:"Warm, rich, dried fruits",food:"Hard cheeses, oven-baked dishes",special:"Made with appassimento method"},
+    de:{name:"Appassimento Rosso",producer:"Squarcione",country:"Italien (Venetien)",vintage:"2021",
+        taste:"Warm, reich, getrocknete Früchte",food:"Hartkäse, Ofengerichte",special:"Hergestellt nach der Appassimento-Methode"},
+    bs:{name:"Appassimento Rosso",producer:"Squarcione",country:"Italija (Veneto)",vintage:"2021",
+        taste:"Toplo, bogato, zrelo voće",food:"Tvrdi sirevi, meso iz pećnice",special:"Proizvedeno metodom appassimento"} },
+  {id:"red_montepulciano_dabruzzo_cornaro_2022",category:"red",
+    en:{name:"Montepulciano d’Abruzzo",producer:"Cornaro",country:"Italy (Abruzzo)",vintage:"2022",
+        taste:"Fruity, intense, fresh",food:"Pasta, grilled meat",special:"Magnum 1.5L"},
+    de:{name:"Montepulciano d’Abruzzo",producer:"Cornaro",country:"Italien (Abruzzen)",vintage:"2022",
+        taste:"Fruchtig, intensiv, frisch",food:"Pasta, Grillfleisch",special:"Magnumflasche 1,5L"},
+    bs:{name:"Montepulciano d’Abruzzo",producer:"Cornaro",country:"Italija (Abruzzo)",vintage:"2022",
+        taste:"Voćno, intenzivno, svježe",food:"Tjestenine, meso sa žara",special:"Velika boca 1.5L"} },
+  {id:"red_nero_davola_luna_2023",category:"red",
+    en:{name:"Nero d’Avola Sicilia",producer:"Luna",country:"Italy (Sicily)",vintage:"2023",
+        taste:"Intense, black cherry, spice",food:"Grilled meat, Sicilian cuisine",special:"Typical Sicilian grape"},
+    de:{name:"Nero d’Avola Sicilia",producer:"Luna",country:"Italien (Sizilien)",vintage:"2023",
+        taste:"Intensiv, Schwarzkirsche, Gewürze",food:"Gegrilltes Fleisch, sizilianische Küche",special:"Typische sizilianische Rebsorte"},
+    bs:{name:"Nero d’Avola Sicilia",producer:"Luna",country:"Italija (Sicilija)",vintage:"2023",
+        taste:"Intenzivno, trešnja, začini",food:"Jela s roštilja, sicilijanska kuhinja",special:"Tipična sicilijanska sorta"} },
+  {id:"red_primitivo_cielo_prima_sole_2023",category:"red",
+    en:{name:"Primitivo (Famiglia Cielo – Prima Sole)",producer:"Famiglia Cielo",country:"Italy (Puglia)",vintage:"2023",
+        taste:"Full-bodied, plum, ripe fruit",food:"Roasts, pasta",special:"Popular Cielo line"},
+    de:{name:"Primitivo (Famiglia Cielo – Prima Sole)",producer:"Famiglia Cielo",country:"Italien (Apulien)",vintage:"2023",
+        taste:"Vollmundig, Pflaume, reife Frucht",food:"Braten, Pasta",special:"Beliebte Linie der Kellerei Cielo"},
+    bs:{name:"Primitivo (Famiglia Cielo – Prima Sole)",producer:"Famiglia Cielo",country:"Italija (Puglia)",vintage:"2023",
+        taste:"Puno tijelo, šljive, zrelo voće",food:"Pečeno meso, tjestenine",special:"Popularna linija vinarije Cielo"} },
+  {id:"red_corvina_negrar_2019",category:"red",
+    en:{name:"Corvina",producer:"Cantina di Negrar",country:"Italy (Veneto)",vintage:"2019",
+        taste:"Fresh, juicy, cherry",food:"Pizza, light dishes",special:"Base grape for Amarone"},
+    de:{name:"Corvina",producer:"Cantina di Negrar",country:"Italien (Venetien)",vintage:"2019",
+        taste:"Frisch, saftig, Kirsche",food:"Pizza, leichte Gerichte",special:"Grundrebsorte für Amarone"},
+    bs:{name:"Corvina",producer:"Cantina di Negrar",country:"Italija (Veneto)",vintage:"2019",
+        taste:"Svježe, sočno, višnje",food:"Pizza, lagana jela",special:"Osnovna sorta za Amarone"} },
+  {id:"red_nero_di_troia_pietralitta_2024",category:"red",
+    en:{name:"Nero di Troia",producer:"Pietralitta",country:"Italy (Apulia)",vintage:"2024",
+        taste:"Fruity, spicy, soft tannins",food:"Barbecue, pasta",special:"Rare native variety"},
+    de:{name:"Nero di Troia",producer:"Pietralitta",country:"Italien (Apulien)",vintage:"2024",
+        taste:"Fruchtig, würzig, sanfte Tannine",food:"Grillgerichte, Pasta",special:"Seltene autochthone Sorte"},
+    bs:{name:"Nero di Troia",producer:"Pietralitta",country:"Italija (Apulija)",vintage:"2024",
+        taste:"Voćno, začinsko, blagi tanini",food:"Roštilj, tjestenine",special:"Rijetka autohtona sorta"} },
+  {id:"red_trepio_casello_bondoni_2021",category:"red",
+    en:{name:"Trepio",producer:"Casello Bondoni",country:"Italy (Lombardy)",vintage:"2021",
+        taste:"Fruity, light, fresh",food:"Pasta, white meat",special:"From the Garda lake region"},
+    de:{name:"Trepio",producer:"Casello Bondoni",country:"Italien (Lombardei)",vintage:"2021",
+        taste:"Fruchtig, leicht, frisch",food:"Pasta, helles Fleisch",special:"Vom Gardasee-Gebiet"},
+    bs:{name:"Trepio",producer:"Casello Bondoni",country:"Italija (Lombardija)",vintage:"2021",
+        taste:"Voćno, pitko, svježe",food:"Paste, bijelo meso",special:"Vinarija s Lugano jezera"} },
+  {id:"red_primitivo_salento_antica_masseria_2023",category:"red",
+    en:{name:"Primitivo Salento",producer:"Antica Masseria Colleone",country:"Italy (Puglia)",vintage:"2023",
+        taste:"Full-bodied, rich",food:"Grilled meat, cheese",special:"Traditional Apulian estate"},
+    de:{name:"Primitivo Salento",producer:"Antica Masseria Colleone",country:"Italien (Apulien)",vintage:"2023",
+        taste:"Vollmundig, kräftig",food:"Gegrilltes Fleisch, Käse",special:"Traditionelles apulisches Gut"},
+    bs:{name:"Primitivo Salento",producer:"Antica Masseria Colleone",country:"Italija (Puglia)",vintage:"2023",
+        taste:"Bogato, puno tijelo",food:"Meso s roštilja, sirevi",special:"Tradicionalna apulijska kuća"} },
+  {id:"red_fibonacci_divvina_2023",category:"red",
+    en:{name:"Fibonacci Divvina Proportione",producer:"Divvina",country:"Italy",vintage:"2023",
+        taste:"Harmonious, rich",food:"Meat dishes, cheese",special:"Unusual blend of Sangiovese & Negroamaro"},
+    de:{name:"Fibonacci Divvina Proportione",producer:"Divvina",country:"Italien",vintage:"2023",
+        taste:"Harmonisch, reichhaltig",food:"Fleischgerichte, Käse",special:"Ungewöhnliche Cuvée aus Sangiovese & Negroamaro"},
+    bs:{name:"Fibonacci Divvina Proportione",producer:"Divvina",country:"Italija",vintage:"2023",
+        taste:"Harmonično, bogato",food:"Mesna jela, sirevi",special:"Neobična kupaža Sangiovese & Negroamaro"} },
+  {id:"red_kleiner_bruder_karl_may_2021",category:"red",
+    en:{name:"Kleiner Bruder",producer:"Karl May",country:"Germany (Rheinhessen)",vintage:"2021",
+        taste:"Fruity, elegant, fresh",food:"White meat, light dishes",special:"Young style, fresh character"},
+    de:{name:"Kleiner Bruder",producer:"Karl May",country:"Deutschland (Rheinhessen)",vintage:"2021",
+        taste:"Fruchtig, elegant, frisch",food:"Helles Fleisch, leichte Speisen",special:"Jugendlicher, frischer Stil"},
+    bs:{name:"Kleiner Bruder",producer:"Karl May",country:"Njemačka (Rheinhessen)",vintage:"2021",
+        taste:"Voćno, elegantno, svježe",food:"Bijelo meso, lagana jela",special:"Mladi stil vina, svjež karakter"} },
+  {id:"red_marios_salento_2021",category:"red",
+    en:{name:"Mario’s Salento",producer:"Mario’s",country:"Italy (Puglia)",vintage:"2021",
+        taste:"Juicy, fruity",food:"Pizza, pasta",special:"Classic Southern Italian"},
+    de:{name:"Mario’s Salento",producer:"Mario’s",country:"Italien (Apulien)",vintage:"2021",
+        taste:"Saftig, fruchtig",food:"Pizza, Pasta",special:"Typischer Süditaliener"},
+    bs:{name:"Mario’s Salento",producer:"Mario’s",country:"Italija (Puglia)",vintage:"2021",
+        taste:"Sočno, voćno",food:"Pizza, tjestenine",special:"Tipičan stil juga Italije"} },
+  {id:"red_manoro_primitivo_2022",category:"red",
+    en:{name:"Manoro Primitivo",producer:"Manoro",country:"Italy (Puglia)",vintage:"2022",
+        taste:"Rich, full-bodied, fruity",food:"Beef, stews",special:"Popular Primitivo"},
+    de:{name:"Manoro Primitivo",producer:"Manoro",country:"Italien (Apulien)",vintage:"2022",
+        taste:"Kräftig, vollmundig, fruchtig",food:"Rindfleisch, Schmorgerichte",special:"Klassiker aus Apulien"},
+    bs:{name:"Manoro Primitivo",producer:"Manoro",country:"Italija (Puglia)",vintage:"2022",
+        taste:"Puno tijelo, bogato, voćno",food:"Crveno meso, gulaši",special:"Popularan Primitivo"} },
+  {id:"red_lacrime_primitivo_manduria_2019",category:"red",
+    en:{name:"Lacrime Primitivo di Manduria",producer:"Lacrime",country:"Italy (Puglia)",vintage:"2019",
+        taste:"Intense, ripe fruit",food:"Roasts, cheese",special:"DOC Manduria, prestigious"},
+    de:{name:"Lacrime Primitivo di Manduria",producer:"Lacrime",country:"Italien (Apulien)",vintage:"2019",
+        taste:"Intensiv, reife Frucht",food:"Braten, Käse",special:"DOC Manduria, renommiert"},
+    bs:{name:"Lacrime Primitivo di Manduria",producer:"Lacrime",country:"Italija (Puglia)",vintage:"2019",
+        taste:"Intenzivno, zrelo voće",food:"Pečeno meso, sirevi",special:"DOC Manduria, poznata apelacija"} },
+  {id:"red_schioppettino_monte_del_carpini_2018",category:"red",
+    en:{name:"Schioppettino",producer:"Monte del Carpini",country:"Italy (Friuli)",vintage:"2018",
+        taste:"Spicy, elegant",food:"Game, grilled meat",special:"Rare local variety"},
+    de:{name:"Schioppettino",producer:"Monte del Carpini",country:"Italien (Friaul)",vintage:"2018",
+        taste:"Würzig, elegant",food:"Wild, Grillfleisch",special:"Seltene autochthone Sorte"},
+    bs:{name:"Schioppettino",producer:"Monte del Carpini",country:"Italija (Friuli)",vintage:"2018",
+        taste:"Začinsko, elegantno",food:"Divljač, meso s roštilja",special:"Rijetka autohtona sorta Friuli"} },
+  {id:"red_i_balzini_balze_verdi_2020",category:"red",
+    en:{name:"I Balzini Balze Verdi",producer:"Di Santo & Di Santo",country:"Italy (Tuscany)",vintage:"2020",
+        taste:"Fresh, fruity, floral",food:"Pasta, roasts",special:"Boutique winery"},
+    de:{name:"I Balzini Balze Verdi",producer:"Di Santo & Di Santo",country:"Italien (Toskana)",vintage:"2020",
+        taste:"Frisch, fruchtig, blumig",food:"Pasta, Braten",special:"Boutique-Weingut"},
+    bs:{name:"I Balzini Balze Verdi",producer:"Di Santo & Di Santo",country:"Italija (Toskana)",vintage:"2020",
+    taste:"Fresh, fruity, floral",food:"Pasta, roasts",special:"Boutique winery"},
+    de:{name:"I Balzini Balze Verdi",producer:"Di Santo & Di Santo",country:"Italien (Toskana)",vintage:"2020",
+        taste:"Frisch, fruchtig, blumig",food:"Pasta, Braten",special:"Boutique-Weingut"},
+    bs:{name:"I Balzini Balze Verdi",producer:"Di Santo & Di Santo",country:"Italija (Toskana)",vintage:"2020",
+        taste:"Svježe, voćno, cvjetno",food:"Pasta, pečeno meso",special:"Boutique vinarija"} },
+  {id:"red_ronco_dei_domenicani_1999",category:"red",
+    en:{name:"Ronco dei Domenicani (Colli Orientali del Friuli)",producer:"—",country:"Italy (Friuli)",vintage:"1999",
+        taste:"Complex, mature, dried fruits",food:"Aged cheese, oven-baked dishes",special:"Very old vintage, rarity"},
+    de:{name:"Ronco dei Domenicani (Colli Orientali del Friuli)",producer:"—",country:"Italien (Friaul)",vintage:"1999",
+        taste:"Komplex, gereift, Trockenfrüchte",food:"Gereifter Käse, Ofengerichte",special:"Sehr alter Jahrgang, Rarität"},
+    bs:{name:"Ronco dei Domenicani (Colli Orientali del Friuli)",producer:"—",country:"Italija (Friuli)",vintage:"1999",
+        taste:"Kompleksno, zrelo, suho voće",food:"Odležani sirevi, meso iz pećnice",special:"Vrlo stara berba, rijetkost"} },
+  {id:"red_macchia_primitivo_manduria_2022",category:"red",
+    en:{name:"Macchia Primitivo di Manduria",producer:"Macchia",country:"Italy (Puglia)",vintage:"2022",
+        taste:"Fruity, rich",food:"Meat dishes, cheese",special:"Typical Manduria quality"},
+    de:{name:"Macchia Primitivo di Manduria",producer:"Macchia",country:"Italien (Apulien)",vintage:"2022",
+        taste:"Fruchtig, reichhaltig",food:"Fleischgerichte, Käse",special:"Typische Manduria-Qualität"},
+    bs:{name:"Macchia Primitivo di Manduria",producer:"Macchia",country:"Italija (Puglia)",vintage:"2022",
+        taste:"Voćno, bogato",food:"Jela od mesa, sirevi",special:"Tipična Manduria"} },
+  {id:"red_vino_rosso_cuore_salvano_2009",category:"red",
+    en:{name:"Vino Rosso C. Cuore",producer:"Salvano",country:"Italy",vintage:"2009",
+        taste:"Aromatic, mature",food:"Hard cheese, roasts",special:"Special Salvano label"},
+    de:{name:"Vino Rosso C. Cuore",producer:"Salvano",country:"Italien",vintage:"2009",
+        taste:"Aromatisch, gereift",food:"Hartkäse, Braten",special:"Spezialetikett von Salvano"},
+    bs:{name:"Vino Rosso C. Cuore",producer:"Salvano",country:"Italija",vintage:"2009",
+        taste:"Aromatično, zrelo",food:"Tvrdi sirevi, pečena jela",special:"Posebna etiketa kuće Salvano"} },
+  {id:"red_cabernet_sauvignon_justinianan_prima_1996",category:"red",
+    en:{name:"Cabernet Sauvignon (Justinianan Prima Alexandria)",producer:"—",country:"Germany",vintage:"1996",
+        taste:"Mature, complex",food:"Beef, game",special:"Very old vintage, rare"},
+    de:{name:"Cabernet Sauvignon (Justinianan Prima Alexandria)",producer:"—",country:"Deutschland",vintage:"1996",
+        taste:"Gereift, komplex",food:"Rindfleisch, Wild",special:"Sehr alter Jahrgang, selten"},
+    bs:{name:"Cabernet Sauvignon (Justinianan Prima Alexandria)",producer:"—",country:"Njemačka",vintage:"1996",
+        taste:"Zrelo, kompleksno",food:"Crveno meso, divljač",special:"Vrlo stara berba, rijetko"} },
+  {id:"red_chateau_brejo_bordeaux_2016",category:"red",
+    en:{name:"Chateau Brejo Bordeaux",producer:"Chateau Brejo",country:"France (Bordeaux)",vintage:"2016",
+        taste:"Elegant, tannic",food:"Steak, roasts",special:"Classic Bordeaux"},
+    de:{name:"Chateau Brejo Bordeaux",producer:"Chateau Brejo",country:"Frankreich (Bordeaux)",vintage:"2016",
+        taste:"Elegant, tanninreich",food:"Steak, Braten",special:"Klassischer Bordeaux"},
+    bs:{name:"Chateau Brejo Bordeaux",producer:"Chateau Brejo",country:"Francuska (Bordeaux)",vintage:"2016",
+        taste:"Elegantno, taninsko",food:"Steak, pečena jela",special:"Klasičan Bordeaux"} },
+  {id:"red_kapistran_crni_ilocki_2022",category:"red",
+    en:{name:"Kapistran Crni",producer:"Iločki Podrumi",country:"Croatia (Ilok)",vintage:"2022",
+        taste:"Light, fruity, easy-drinking",food:"Light dishes, cheese",special:"Small bottle 0.187L"},
+    de:{name:"Kapistran Crni",producer:"Iločki Podrumi",country:"Kroatien (Ilok)",vintage:"2022",
+        taste:"Leicht, fruchtig, süffig",food:"Leichte Speisen, Käse",special:"Kleine Flasche 0,187L"},
+    bs:{name:"Kapistran Crni",producer:"Iločki Podrumi",country:"Hrvatska (Ilok)",vintage:"2022",
+        taste:"Lagano, voćno, pitko",food:"Lagana jela, sirevi",special:"Mala boca 0.187L"} },
+
+  /* ---------- ROSÉ (still) ---------- */
+  // (From rose english/deutsch/bosanski)
+  {id:"rose_luna_rosato_terre_siciliane_2024",category:"rose",
+    en:{name:"Luna Rosato Terre Siciliane",producer:"Luna",country:"Italy (Sicily)",vintage:"2024",
+        taste:"Fresh, fruity, strawberry & raspberry",food:"Light salads, pasta, white meat",special:"Typical Mediterranean rosé"},
+    de:{name:"Luna Rosato Terre Siciliane",producer:"Luna",country:"Italien (Sizilien)",vintage:"2024",
+        taste:"Frisch, fruchtig, Erdbeere & Himbeere",food:"Leichte Salate, Pasta, helles Fleisch",special:"Typischer mediterraner Rosé"},
+    bs:{name:"Luna Rosato Terre Siciliane",producer:"Luna",country:"Italija (Sicilija)",vintage:"2024",
+        taste:"Svježe, voćno, jagoda i malina",food:"Lagane salate, tjestenina, bijelo meso",special:"Tipičan mediteranski rosé"} },
+  {id:"rose_negroamaro_rosato_delo_2021",category:"rose",
+    en:{name:"Negroamaro Rosato (Delo/Deco)",producer:"Delo",country:"Italy (Puglia)",vintage:"2021",
+        taste:"Intense fruity, red currant, crisp finish",food:"Pizza, light pasta, seafood",special:"Made from Negroamaro grape"},
+    de:{name:"Negroamaro Rosato (Delo/Deco)",producer:"Delo",country:"Italien (Apulien)",vintage:"2021",
+        taste:"Intensiv fruchtig, rote Johannisbeere, frischer Abgang",food:"Pizza, leichte Pasta, Meeresfrüchte",special:"Aus der Rebsorte Negroamaro"},
+    bs:{name:"Negroamaro Rosato (Delo/Deco)",producer:"Delo",country:"Italija (Puglia)",vintage:"2021",
+        taste:"Intenziv voćno, crvena ribizla, svjež završetak",food:"Pizza, lagane paste, morski plodovi",special:"Od sorte Negroamaro"} },
+  {id:"rose_feudo_rosato_feliciana_2024",category:"rose",
+    en:{name:"Feudo Rosato",producer:"Feliciana",country:"Italy (Lombardy)",vintage:"2024",
+        taste:"Delicate, floral, strawberry",food:"Starters, salads, cheese",special:"Boutique Lugana producer"},
+    de:{name:"Feudo Rosato",producer:"Feliciana",country:"Italien (Lombardei)",vintage:"2024",
+        taste:"Zart, blumig, Erdbeere",food:"Vorspeisen, Salate, Käse",special:"Boutique Lugana Produzent"},
+    bs:{name:"Feudo Rosato",producer:"Feliciana",country:"Italija (Lombardija)",vintage:"2024",
+        taste:"Nježan, cvjetan, jagoda",food:"Predjela, salate, sirevi",special:"Boutique Lugana proizvođač"} },
+  {id:"rose_frankovka_ilocki_2023",category:"rose",
+    en:{name:"Rosé Frankovka",producer:"Iločki Podrumi",country:"Croatia (Ilok)",vintage:"2023",
+        taste:"Fruity, light, easy-drinking",food:"Light meals, cheese, starters",special:"Small bottle 0.187L"},
+    de:{name:"Rosé Frankovka",producer:"Iločki Podrumi",country:"Kroatien (Ilok)",vintage:"2023",
+        taste:"Fruchtig, leicht, süffig",food:"Leichte Gerichte, Käse, Vorspeisen",special:"Kleine Flasche 0,187L"},
+    bs:{name:"Rosé Frankovka",producer:"Iločki Podrumi",country:"Hrvatska (Ilok)",vintage:"2023",
+        taste:"Voćno, lagano, pitko",food:"Lagana jela, sirevi, predjela",special:"Mala boca 0.187L"} },
+        {id:"white_feudo_feliciana",category:"white",
+    en:{name:"Feudo",producer:"Feliciana",country:"Italy (Lombardy)",vintage:"2024",
+        taste:"Fresh, fruity, strawberry and cherry",food:"Light pasta, salads, white meat",special:"Rosé from the Valtenesi area (Lake Garda)"},
+    de:{name:"Feudo",producer:"Feliciana",country:"Italien (Lombardei)",vintage:"2024",
+        taste:"Frisch, fruchtig, Erdbeere und Kirsche",food:"Leichte Pasta, Salate, helles Fleisch",special:"Rosé aus dem Valtenesi-Gebiet (Gardasee)"},
+    bs:{name:"Feudo",producer:"Feliciana",country:"Italija (Lombardija)",vintage:"2024",
+        taste:"Svježe, voćno, jagoda i trešnja",food:"Lagane paste, salate, bijelo meso",special:"Rosé iz Valtenesi područja (Gardsko jezero)"} },
+
+  /* ---------- PROSECCO / SPARKLING ROSÉ ---------- */
+  {id:"prosecco_baylon_185_frizzante_rosato_nv",category:"prosecco",
+    en:{name:"Baylon 185 Frizzante Rosato",producer:"Cantina Ruggieri",country:"Italy (Veneto)",vintage:"NV",
+        taste:"Sparkling, fresh, berry fruit",food:"Aperitif, light dishes",special:"Light frizzante rosé"},
+    de:{name:"Baylon 185 Frizzante Rosato",producer:"Cantina Ruggieri",country:"Italien (Venetien)",vintage:"NV",
+        taste:"Perlend, frisch, Beerenfrucht",food:"Aperitif, leichte Gerichte",special:"Leichter Frizzante Rosé"},
+    bs:{name:"Baylon 185 Frizzante Rosato",producer:"Cantina Ruggieri",country:"Italija (Veneto)",vintage:"NV",
+        taste:"Pjenušavo, svježe, bobičasto voće",food:"Aperitiv, lagana jela",special:"Lagani frizzante rosé"} },
+  {id:"prosecco_rosmadre_brut_bernardi_nv",category:"prosecco",
+    en:{name:"Rosmadre Brut",producer:"Bernardi",country:"Italy (Veneto)",vintage:"NV",
+        taste:"Dry, lively, citrus and red fruit",food:"Aperitif, shellfish, light dishes",special:"Classic prosecco rosé"},
+    de:{name:"Rosmadre Brut",producer:"Bernardi",country:"Italien (Venetien)",vintage:"NV",
+        taste:"Trocken, lebendig, Zitrus und rote Früchte",food:"Aperitif, Muscheln, leichte Speisen",special:"Klassischer Prosecco Rosé"},
+    bs:{name:"Rosmadre Brut",producer:"Bernardi",country:"Italija (Veneto)",vintage:"NV",
+        taste:"Suho, živahno, citrus i crveno voće",food:"Aperitiv, školjke, lagana jela",special:"Klasičan prosecco rosé"} },
+
+  /* ---------- SPIRITS (placeholder: nema podataka još) ---------- */
+  // Ovdje dodaj listu kad pošalješ PDF za žestoka pića.
+];
+
+/* ===== helper: columns per category ===== */
+const WINE_COLS = ["name","producer","country","vintage","taste","food","special"];
+const SPIRIT_COLS = ["s_name","s_style","s_origin","s_abv","s_vol","s_price","s_notes"];
+
+/* ===== DOM refs ===== */
+const grid = document.getElementById('grid');
+const headRow = document.getElementById('headRow');
+const countEl = document.getElementById('count');
+const tipLine = document.getElementById('tipLine');
+const searchInput = document.getElementById('searchInput');
+const catBar = document.getElementById('cats');
+const langBar = document.getElementById('langBar');
+
+/* ===== UI: build headers ===== */
+function renderHead(){
+  headRow.classList.toggle('spirits', currentCat==='spirits');
+  headRow.innerHTML = '';
+  const labels = LABELS[currentLang];
+  const cols = (currentCat==='spirits') ? SPIRIT_COLS : WINE_COLS;
+  cols.forEach(key=>{
+    const div = document.createElement('div');
+    div.textContent = labels[key];
+    headRow.appendChild(div);
+  });
+}
+
+/* ===== filter + render cards ===== */
+function matchesQuery(item){
+  if(!query) return true;
+  const langObj = item[currentLang];
+  const hay = [
+    langObj.name, langObj.producer, langObj.country, langObj.taste, langObj.food, langObj.special
+  ].join(' ').toLowerCase();
+  return hay.includes(query.toLowerCase());
+}
+
+function renderGrid(){
+  renderHead();
+  grid.classList.toggle('spirits', currentCat==='spirits');
+  const labels = LABELS[currentLang];
+  const data = ITEMS.filter(x=>x.category===currentCat && matchesQuery(x));
+
+  grid.innerHTML = '';
+  data.forEach(it=>{
+    const l = it[currentLang];
+    const card = document.createElement('div');
+    card.className = 'card';
+
+    if(currentCat==='spirits'){
+      // label map for spirits
+      const fields = [
+        [labels.s_name, l.name],
+        [labels.s_style, l.style||l.taste||''],
+        [labels.s_origin, l.country||''],
+        [labels.s_abv, l.abv||''],
+        [labels.s_vol, l.volume||''],
+        [labels.s_price, l.price||''],
+        [labels.s_notes, l.special||l.notes||'']
+      ];
+      fields.forEach(([lab,val])=>{
+        const d = document.createElement('div');
+        if(val===undefined) val='';
+        d.innerHTML = `<div class="label">${lab}</div>${val}`;
+        card.appendChild(d);
+      });
+    }else{
+      // wines layout
+      const fields = [
+        [labels.name, l.name],
+        [labels.producer, l.producer],
+        [labels.country, l.country],
+        [labels.vintage, l.vintage],
+        [labels.taste, l.taste],
+        [labels.food, l.food],
+        [labels.special, l.special]
+      ];
+      fields.forEach(([lab,val])=>{
+        const d = document.createElement('div');
+        d.innerHTML = `<div class="label">${lab}</div>${val}`;
+        card.appendChild(d);
+      });
+    }
+
+    // === make card clickable → detail page (based on wine name) ===
+    const fileSafe = String(l.name || '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g,'-')
+      .replace(/(^-|-$)/g,'');
+    const detailFile = `wine-${fileSafe}.html`;
+    card.style.cursor = 'pointer';
+    card.addEventListener('click', () => {
+      window.location.href = detailFile;
+    });
+
+    grid.appendChild(card);
+  });
+
+  const isSpirits = currentCat==='spirits';
+  const countLabel = isSpirits ? labels.shown_spirits : labels.shown_wines;
+  countEl.textContent = `${data.length} ${countLabel}`;
+}
+
+
+/* ===== wire up language, category, search ===== */
+langBar.addEventListener('click', (e)=>{
+  const btn = e.target.closest('button[data-lang]');
+  if(!btn) return;
+  [...langBar.children].forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  currentLang = btn.dataset.lang;
+  // placeholders & category button labels
+  searchInput.placeholder = LABELS[currentLang].searchPH;
+  [...catBar.querySelectorAll('button[data-cat]')].forEach(b=>{
+    b.textContent = LABELS[currentLang][b.dataset.cat];
+  });
+  renderGrid();
+});
+
+catBar.addEventListener('click', (e)=>{
+  const btn = e.target.closest('button[data-cat]');
+  if(!btn) return;
+  [...catBar.children].forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  currentCat = btn.dataset.cat;
+  renderGrid();
+});
+
+searchInput.addEventListener('input', (e)=>{
+  query = e.target.value.trim();
+  renderGrid();
+});
+
+/* ===== initial boot ===== */
+searchInput.placeholder = LABELS[currentLang].searchPH;
+renderGrid();
+</script>
+</body>
+</html>
